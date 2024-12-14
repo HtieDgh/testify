@@ -164,3 +164,9 @@ vendor/
 
 # virtual enviroment variables
 venv/
+
+# test user_data folder for user test saved files
+user_data/
+
+# tmp files of framework
+tmp/

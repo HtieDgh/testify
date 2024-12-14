@@ -9,6 +9,32 @@ RewriteEngine On
 
 RewriteRule ^(tmp)\/|\.ini$ - [R=404]
 
+# changing rewrites of files
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*\.css)$ app/views/html/css/$1 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^.*/([0-9a-z_]+\.css)$ app/views/html/css/$2 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*\.png)$ app/views/html/img/$1 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^.*/([0-9a-z_]+\.png)$ app/views/html/img/$1 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([^/.]+\.svg)$ app/views/html/img/$1 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^.*/([0-9a-z_]+\.svg)$ app/views/html/img/$1 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*\.js)$ app/views/html/js/$1 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^.*/([0-9a-z_]+\.js)$ app/views/html/js/$1 [L,QSA]
+
+# changing rewrites of requests
 RewriteCond %{REQUEST_FILENAME} !-l
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

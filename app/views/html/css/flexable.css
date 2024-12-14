@@ -1,0 +1,65 @@
+/*Библеотека флексов*/
+.flex_se_r_afs{
+    align-items: flex-start;
+}
+.flex_se_r_afe,.flex_fs_r_afe{
+    align-items: flex-end;
+}
+.flex_c_r_ab{
+    align-items: baseline;
+}
+.flex_c_c_ac,.flex_sb_c_ac,.flex_c_r_ac,.flex_sb_r_ac,.flex_fe_r_ac,
+.flex_se_r_ac,.flex_fs_r_ac,.flex_fs_c_ac,.flex_fe_c_ac{
+    align-items:center;
+}
+.flex_c_r,.flex_c_c,.flex_c_c_ac,.flex_c_r_ac,.flex_c_r_ab,
+.flex_sb_r,.flex_sb_c,.flex_sb_r_ac,.flex_sb_c_ac,
+.flex_fs_r,.flex_fs_r_ac,.flex_fs_c_ac,.flex_fs_r_afe,
+.flex_fe_r,.flex_fe_c_ac,.flex_fe_r_ac,
+.flex_se_r,.flex_se_r_ac,
+.flex_se_r_afs,.flex_se_r_afe
+{
+    display:flex;
+}
+.flex_c_r,.flex_c_r_ac,.flex_c_r_ab,
+.flex_sb_r,.flex_sb_r_ac,
+.flex_fe_r,.flex_fe_r_ac,
+.flex_fs_r,.flex_fs_r_ac,.flex_fs_r_afe,
+.flex_se_r,.flex_se_r_ac,
+.flex_se_r_afs,.flex_se_r_afe{
+    flex-direction:row;
+}
+.flex_c_c,.flex_c_c_ac,
+.flex_sb_c,.flex_sb_c_ac,
+.flex_fs_c_ac,.flex_fe_c_ac{
+    flex-direction:column;
+    height: 100%;
+}
+.flex_fe_r,.flex_fe_r_ac,.flex_fe_c_ac{
+    justify-content:flex-end;
+} 
+.flex_fs_r,.flex_fs_r_ac,.flex_fs_c_ac,.flex_fs_r_afe{
+    justify-content:flex-start;
+}
+.flex_c_r,.flex_c_c,.flex_c_c_ac,.flex_c_r_ac,.flex_c_r_ab{
+    justify-content:center;
+}
+.flex_sb_r,.flex_sb_c,.flex_sb_r_ac,.flex_sb_c_ac{
+    justify-content:space-between;
+}
+.flex_se_r,.flex_se_r_ac,.flex_se_r_afs,.flex_se_r_afe{
+    justify-content:space-evenly;
+}
+.flex_wr{
+    flex-wrap:wrap;
+}
+.flex_wrr{
+    flex-wrap:wrap-reverse;
+}
+.flex_asfs{
+    align-self:flex-start;
+}
+
+.flex_ass{
+    align-self:stretch;
+}

@@ -1,0 +1,11 @@
+.content{
+    max-width: 900px;
+    margin: 0 auto;
+  }
+.test_line{
+    padding: 5px 0;
+}
+    .test_line:hover{
+        transition: all 100ms;
+        background-color:var(--test-selection-color);
+    }

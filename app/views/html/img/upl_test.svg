@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 32 32"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   sodipodi:docname="upl_test.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     showguides="true"
+     inkscape:zoom="25.345359"
+     inkscape:cx="13.592232"
+     inkscape:cy="11.461665"
+     inkscape:window-width="2560"
+     inkscape:window-height="1361"
+     inkscape:window-x="2391"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g8" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Layer 1"
+     transform="translate(0,-1.6571081)" />
+  <g
+     inkscape:groupmode="layer"
+     id="g8"
+     inkscape:label="Копия Layer 2"
+     transform="translate(0,-1.6571081)">
+    <rect
+       style="opacity:1;fill:#9f9f9f;fill-opacity:1;stroke:#0000a8;stroke-width:0.389886;stroke-opacity:0"
+       id="rect8"
+       width="14.082969"
+       height="2.1690016"
+       x="-28.275625"
+       y="6.5851092"
+       ry="1.0845008"
+       transform="matrix(-0.71087974,-0.70331358,0.71087974,-0.70331358,0,0)"
+       rx="1.2173018" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="g12"
+     inkscape:label="Копия Копия Layer 3"
+     transform="translate(0,-1.6571081)">
+    <rect
+       style="opacity:1;fill:#9f9f9f;fill-opacity:1;stroke:#0000a8;stroke-width:0.396909;stroke-opacity:0"
+       id="rect12"
+       width="14.336616"
+       height="2.2080672"
+       x="-6.2775426"
+       y="13.820986"
+       ry="1.1040336"
+       transform="matrix(0.73446812,-0.67864319,0.73446812,0.67864319,0,0)"
+       rx="1.2392266" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="g9"
+     inkscape:label="Копия Копия Layer 2">
+    <rect
+       style="opacity:1;fill:#9f9f9f;fill-opacity:1;stroke:#0000a8;stroke-width:0.646105;stroke-opacity:0"
+       id="rect9"
+       width="24.412132"
+       height="2.454711"
+       x="-28.423878"
+       y="-28.385227"
+       ry="1.2273555"
+       transform="scale(-1)"
+       rx="0.93091428" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="g10"
+     inkscape:label="Копия Копия Копия Layer 2">
+    <rect
+       style="opacity:1;fill:#9f9f9f;fill-opacity:1;stroke:#0000a8;stroke-width:0.375988;stroke-opacity:0"
+       id="rect10"
+       width="7.1363778"
+       height="2.8436224"
+       x="21.244362"
+       y="-6.5386209"
+       ry="1.4218112"
+       transform="rotate(90)"
+       rx="1.4707066" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="g11"
+     inkscape:label="Копия Копия Копия Копия Layer 2">
+    <rect
+       style="opacity:1;fill:#9f9f9f;fill-opacity:1;stroke:#0000a8;stroke-width:0.375988;stroke-opacity:0"
+       id="rect11"
+       width="7.1363778"
+       height="2.8436224"
+       x="21.210123"
+       y="-28.776428"
+       ry="1.4218112"
+       transform="rotate(90)"
+       rx="1.4707066" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="g6"
+     inkscape:label="Копия Layer 1">
+    <rect
+       style="opacity:1;fill:#9f9f9f;fill-opacity:1;stroke:#000000;stroke-width:0.68324;stroke-opacity:0"
+       id="rect6"
+       width="22.591496"
+       height="2.9662104"
+       x="-25.237673"
+       y="14.698892"
+       ry="1.4831052"
+       transform="rotate(-90)"
+       rx="1.2325758" />
+  </g>
+</svg>

@@ -1,0 +1,72 @@
+/*=========Форма Редактора========*/
+.decor {
+	position: relative;
+	width: 800px;
+	background: white;
+	border-radius: 30px;
+}
+  .form-inner label{
+    border-bottom:1px solid transparent ;
+  }
+    .form-inner label:hover{
+        border-bottom-color:var(--high-bg-color) ;
+    }
+  .form-inner {padding: 0 50px;}
+  @media(max-width:600px){
+    .form-inner{
+        padding: 0 1%;
+    }
+  }
+  .form-inner input,
+  .form-inner textarea,.insert_fl {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0 20px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    background: #E9EFF6;
+    line-height: 1.2em;
+    border-width: 0;
+    border-radius: 10px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+    border: 4px solid transparent;
+    
+  }
+  .file_in{
+	  max-width: 350px;
+  }
+    
+	.form-inner input:focus,
+	.form-inner textarea:focus{
+		outline: none;
+		border: 4px solid var(--high-bg-color);
+  }
+    .form-inner input[type="number"]{
+        width: 100px;
+    }
+    .form-inner input[type=checkbox]{
+        width:auto;
+    }
+    .form-inner input[name="fine"]{
+      display: none;
+      border: 4px dashed var(--alert-txt-color);
+    }
+     
+
+  .form-inner textarea {resize: vertical;}
+  .form-inner h3 {
+	margin-top: 0;
+	font-family: 'Roboto', sans-serif;
+	font-weight: 500;
+	font-size: 24px;
+    color: #707981;
+    text-align: center;
+  }
+  #private{
+	  display: inline-block;
+	  width: auto;
+  }
+ 
+  /*=========Конец Форма Редактора========*/

@@ -1,0 +1,69 @@
+/*=== Вопрос теста ===*/
+
+.qst_btn,.qst_btn_alt{
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    border-style: dashed;
+    border-width: 3px;
+    border-color:transparent;
+    width: 100%;
+}
+    .qst_btn:hover{
+        background-color: var(--ico-accent-color);
+        border-radius: 5px;
+        border-color: var(--high-bg-color);
+    }
+    .qst_btn_alt:hover{
+        background-color: var(--ico-accent-color);
+        border-radius: 5px;
+        border-color: var(--alert-txt-color);
+    }
+    .del_answ_btn{
+        width: 40px;
+    }
+    .del_answ_btn img{
+        width: 100%;
+    }
+    
+.qst_type{
+    width: 220px;
+}
+.qst_number{
+    margin-top:5px;
+}
+
+.content{
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+  .confirm_edit_btn {
+    display: block;
+    min-width: 50%;
+    box-sizing: border-box;
+    
+    padding: 5px 20px;
+    margin: 10px 0;
+    line-height: 1.2em;
+
+    border-radius: 20px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+    font-weight: bold;
+    text-decoration: none;
+
+    background: var(--btn-alt-bg-color);
+    border: 4px solid var(--btn-alt-txt-color);
+    color: var(--btn-alt-txt-color);   
+  }
+    @media(max-width:600px){
+      .confirm_edit_btn{
+          min-width: 80%
+      }
+    }
+		.confirm_edit_btn:hover, .confirm_edit_btn_disabled{
+			background: var(--btn-bg-color);
+			color:var(--btn-txt-color);
+			transition: all 200ms;
+		} 
