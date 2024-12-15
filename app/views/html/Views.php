@@ -1,6 +1,4 @@
 <?php
-global $f3;
-
 /* public $html_dflt_title='Главная страница - Testify'; */
 //Файл заменяет Представление
     class Views{
@@ -91,8 +89,7 @@ global $f3;
          * @return string тег <header>
          */
         public function Header($is_auth=FALSE){
-            global $f3;
-            return '<header>
+             return '<header>
             <div class="header_line flex_sb_r_ac">
                 <div class="flex_fs_r_ac ">
                     <div>
@@ -136,7 +133,6 @@ global $f3;
          * @return string DOMString
         */
         public function Login($login_error=''){
-            global $f3;
             $this->_setCss(['flexable.css','color_theme.css','general.css','login.css']);
             $login_error=$login_error<>''?$login_error.'<br><br>':'';
             return '
@@ -174,7 +170,7 @@ global $f3;
         */
         public function Rigist($html_txt='')
         {
-            global $f3;
+       
             $this->_setCss(['flexable.css','color_theme.css','general.css','login.css']);
             $this->_setJs(['jquery-3.3.1.js','regist.js']);
             return '
@@ -213,14 +209,14 @@ global $f3;
          * @param array ассоциативный масив с необходимыми для вывода данными. Должен содержать ключи: s_ut search of user tests- текст предыдущего запроса по тестам; ut user_tests - данные созданых пользователем тестов; ava_url - src до user аватар; u - данные user_data модели Security; s_ur - search of user results текст поиска по результатам пользователя
          * @return string DOMString
         */
-        public function Profile($visual_data)
+        public function Profile($view_data)
         {
-            global $f3;
+         
             $this->_setCss(['flexable.css','color_theme.css','general.css','profile.css','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.css']);
             $this->_setJs(['jquery-3.3.1.js','profile.js','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.js']);
             //Пользовательские тесты
             $ut_html='';
-            foreach ($visual_data['ut'] as $test) {
+            foreach ($view_data['ut'] as $test) {
                 $ut_html.='
                 <div class="flex_sb_r_ac test_line mr_t_10">
                     <div>
@@ -249,18 +245,18 @@ global $f3;
             $ut_html=$ut_html==''?'Вы еще не создали не одного теста':$ut_html.'<hr>';
             //Попытки сдачи
             $ur_html='';
-            foreach ($visual_data['ur'] as $v) {
+            foreach ($view_data['ur'] as $v) {
                 $ur_html.=$this->_GetResultWrap($v);
             }
             
             return '
             <div class="flex_se_r_afe content flex_wrr">
-            '.($visual_data['u']['access'] > 1 ? '
+            '.($view_data['u']['access'] > 1 ? '
                 <div class="u_t">
                         <div class="note">
                             <div class="tst_srch">
                                 <form method="GET" action="blog.php" class="flex_c_r" id="test_search">
-                                    <input type="text" required name="user_search" placeholder="'.$visual_data['s_ut'].'">
+                                    <input type="text" required name="user_search" placeholder="'.$view_data['s_ut'].'">
                                     <button type="submit"><img src="search.png"></button>
                                 </form>
                             </div>
@@ -288,15 +284,15 @@ global $f3;
                     <div class="note">
                         <div class="flex_c_r">
                             <div class="ava_img flex_c_c">
-                                <img id="imgprof_'.$visual_data['u']['id'].'" src="'.$visual_data['u']['ava_url'].'">
+                                <img id="imgprof_'.$view_data['u']['id'].'" src="'.$view_data['u']['ava_url'].'">
                             </div>
                         </div>
-                        <h1 class="profile_info">'.$visual_data['u']['name'].'</h1>
+                        <h1 class="profile_info">'.$view_data['u']['name'].'</h1>
                     </div>
                     <div class="note">
                         <div class="tst_srch">
                             <form method="GET" action="" class="flex_c_r" id="result_search">
-                                <input type="text" required name="user_search" placeholder="'.$visual_data['s_ur'].'">
+                                <input type="text" required name="user_search" placeholder="'.$view_data['s_ur'].'">
                                 <button type="submit"><img src="search.png"></button>
                             </form>
                         </div>
@@ -328,7 +324,11 @@ global $f3;
                 </div>
                 
             </div>
-            ';
+            '.($view_data['err_txt']!=''? 
+                $this->_GetErrWrap($view_data['err_txt'])
+                :
+                ''
+            );
         }
         
         /**
@@ -339,7 +339,7 @@ global $f3;
         */
         public function Editor($td=null,$err_txt='')
         {
-            global $f3;
+         
             $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','editor.css','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.css','modal.css']);
             $this->_setJs(['jquery-3.3.1.js','editor.js','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.js']);
             $html='';
@@ -370,7 +370,7 @@ global $f3;
                 
             }
             $html.='    
-                <a title="Добавить вопрос" id="add_qst_btn" class="qst_btn" href="#"><img alt="Добавить вопрос" src="add_test.svg"></a>
+                <a title="Добавить вопрос: Двойной клик - добавить уже созданый" id="add_qst_btn" class="qst_btn" href="#"><img alt="Добавить вопрос" src="add_test.svg"></a>
             
                 <div class="note">
                     <div class="flex_c_r ">
@@ -810,9 +810,9 @@ global $f3;
                 return $html;
         }
 
-        public function Statistics($visual_data, $res_data, $err_txt='')
+        public function Statistics($view_data, $res_data, $err_txt='')
         {
-            global $f3;
+           
             $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','check.css']);
             $html='';
             if($err_txt!=='')
@@ -873,14 +873,14 @@ global $f3;
                 <div class="note">
                 <div class="tst_srch">
                         <form method="GET" action="'.static::$f3->get("SITE_DOMAIN").'statistics/'.$res_data[0]['link'].'" class="flex_c_r">
-                            <input type="text" required name="results_search" placeholder="'.$visual_data['s_rslts'].'">
+                            <input type="text" required name="results_search" placeholder="'.$view_data['s_rslts'].'">
                             <button type="submit"><img src="'.static::$f3->get("SITE_DOMAIN").'search.png"></button>
                         </form>
                         
                     </div>
                     <br>
                     <div class="flex_sb_r_ac">
-                        <h2 class="mr_t_10">Результаты пользователей: '.$visual_data['s_cancel_btn'].'</h2>
+                        <h2 class="mr_t_10">Результаты пользователей: '.$view_data['s_cancel_btn'].'</h2>
                         <p class="mr_r_10">Баллы</p>
                     </div>
                 <hr>
@@ -901,7 +901,7 @@ global $f3;
          */
         protected function _GetErrWrap($err_txt)
         {
-            global $f3;
+          
             return '
                 <div id="err_wrap" class="modal">
                     <p>
@@ -962,7 +962,7 @@ global $f3;
         */
         protected function _setCss($css_a=[])
         {
-            global $f3;
+          
             foreach ($css_a as $v) {
                 if(!in_array($v,$this->css)){
                     $this->css[]=$v;
@@ -976,7 +976,7 @@ global $f3;
         */
         protected function _setJs($js_a=[])
         {
-            global $f3;
+          
             foreach ($js_a as $v) {
                 if(!in_array($v,$this->js)){
                     $this->js[]=$v;

@@ -7,7 +7,7 @@ $(document).ready(function(){
         a.target="_blank";
         a.click();
         }
-    // Возвращает текущую структуры данных теста
+    // Возвращает текущую структуру данных теста
     function getTestData() {
         let qst_data=[];
         //Формирование списка существующих вопросов и ответов на них
@@ -99,6 +99,7 @@ $(document).ready(function(){
         });
     
         //==== Добавление варианта ответа в вопрос ====
+        // Одиночный клик - Новый вопрос
         $('.add_answ_btn').off('click').click(function(e){
             e.preventDefault();
             let q_id=$(this).attr('href');
@@ -125,7 +126,10 @@ $(document).ready(function(){
             $('#'+q_id+'_q .del_answ_btn').show();
             newEvents();
         });
-    
+        // Двойтой клик - Открыть список существующих вопросов в БД 
+        // TODO
+
+
         //=== Удаление варианта ответа ===
         $('.del_answ_btn').off('click').click(function(e){
             e.preventDefault();
@@ -281,9 +285,9 @@ $(document).ready(function(){
             }
         });
     
-        if($(this).html()!=`Загрузка...`){
-            //Запуск анимации загрузки
-            $(this).html(`Загрузка...`);
+        if($(this).html()!=`Отправка...`){
+            //Запуск анимации загрузки: изменяется текст
+            $(this).html(`Отправка...`);
             try {
     
                 function fn_serverResponse(msg){

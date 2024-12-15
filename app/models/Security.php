@@ -1,8 +1,6 @@
 <?php 
 class Security
 {
-	
-
 	/**
 	 * <p>Проверка авторизации и заполнение $f3[user]</p>
 	 * @return string login_error текст ошибки в случае провала авторизации
@@ -13,12 +11,13 @@ class Security
 		// Извлекается логин и пароль из переданных данных предварительно отфильтровывая лишие символы если они есть
 		$f3->set("POST",CFuns::sanitizeString($f3->get("POST")));
 
-		// Изначально устанавливается id пользователя=0 (пользователя нет)
+		// Изначально устанавливается id пользователя=0 access=-1 (пользователя нет)
 		$f3->mset(
 			array(
 				"user.login"=> $f3->get("POST.login") !== NULL ? $f3->get("POST.login") : ( $f3->get("COOKIE.security_login") !== NULL ? $f3->get("COOKIE.security_login") : ''),
 				"user.password"=> $f3->get("POST.password")!==NULL  ?  md5($f3->get("POST.password")) : ( $f3->get("COOKIE.security_password")!==NULL ? $f3->get("COOKIE.security_password") : ''),
-				"user.id"=>0
+				"user.id"=>0,
+				"user.access"=>-1
 			)
 		);
 		

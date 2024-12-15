@@ -22,4 +22,8 @@ $(document).ready(function(){
         e.preventDefault();
         location.href=$('#modal_test_link').val();
     });
+  //==== Отображение текста ошибки от сервера если она есть ====
+  if($('#err_wrap').length){
+        $('#err_wrap').modal();
+    }
 });
