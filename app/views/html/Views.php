@@ -5,29 +5,29 @@ global $f3;
 //Файл заменяет Представление
     class Views{
         public $html_head='';
-
+        public static $f3;
         private $css=[];
         private $js=[];
         private $view_links='';
 
-        public function __construct() {
-            global $f3;
+        public function __construct(&$f3) {
+            static::$f3=$f3;
             $this->html_head='
-                <link rel="stylesheet" type="text/css" href="'.$f3->get("SITE_DOMAIN").'reset.css">
+                <link rel="stylesheet" type="text/css" href="'.static::$f3->get("SITE_DOMAIN").'reset.css">
                 <link rel="preconnect" href="https://fonts.googleapis.com">
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
                 <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
                 <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet">
                 
-                <link rel="stylesheet" type="text/css" href="'.$f3->get("SITE_DOMAIN").'kanit_f.css">
+                <link rel="stylesheet" type="text/css" href="'.static::$f3->get("SITE_DOMAIN").'kanit_f.css">
                     
-                <link rel="apple-touch-icon" sizes="180x180" href="'.$f3->get("SITE_DOMAIN").'apple-touch-icon.png">
-                <link rel="icon" type="image/png" sizes="32x32" href="'.$f3->get("SITE_DOMAIN").'favicon-32x32.png">
-                <link rel="icon" type="image/png" sizes="16x16" href="'.$f3->get("SITE_DOMAIN").'favicon-16x16.png">
-                <link rel="manifest" href="'.$f3->get("SITE_DOMAIN").'app/views/html/site.webmanifest">
+                <link rel="apple-touch-icon" sizes="180x180" href="'.static::$f3->get("SITE_DOMAIN").'apple-touch-icon.png">
+                <link rel="icon" type="image/png" sizes="32x32" href="'.static::$f3->get("SITE_DOMAIN").'favicon-32x32.png">
+                <link rel="icon" type="image/png" sizes="16x16" href="'.static::$f3->get("SITE_DOMAIN").'favicon-16x16.png">
+                <link rel="manifest" href="'.static::$f3->get("SITE_DOMAIN").'app/views/html/site.webmanifest">
                 <meta name="msapplication-TileColor" content="#da532c">
                 <meta name="theme-color" content="#ffffff">
-                <script src="'.$f3->get("SITE_DOMAIN").'jquery-3.3.1.js"></script>
+                <script src="'.static::$f3->get("SITE_DOMAIN").'jquery-3.3.1.js"></script>
             ';
         }
 
@@ -96,10 +96,10 @@ global $f3;
             <div class="header_line flex_sb_r_ac">
                 <div class="flex_fs_r_ac ">
                     <div>
-                        <a href="'.$f3->get("SITE_DOMAIN").'"><img src="'.$f3->get("SITE_DOMAIN").'logo.png" alt="Логотип сайта" class="logo"></a>
+                        <a href="'.static::$f3->get("SITE_DOMAIN").'"><img src="'.static::$f3->get("SITE_DOMAIN").'logo.png" alt="Логотип сайта" class="logo"></a>
                     </div>
                     <div class="head_txt kanit-bold">
-                        <h1><a href="'.$f3->get("SITE_DOMAIN").'">Testify</a></h1>
+                        <h1><a href="'.static::$f3->get("SITE_DOMAIN").'">Testify</a></h1>
                     </div>
                 </div>
                 '.($is_auth?
@@ -142,7 +142,7 @@ global $f3;
             return '
                 <div class="flex_c_r_ac welcome">
                     <div id="signin_form" class="ComeIn">
-                        <form action="'.$f3->get("SITE_DOMAIN").'" method="POST" class="LogIn">	
+                        <form action="'.static::$f3->get("SITE_DOMAIN").'" method="POST" class="LogIn">	
                             <h2 class="LogInTxt" id="serverInfo">Введите ваш логин и пароль</h2>
                             
                         <div class="group">      
@@ -161,7 +161,7 @@ global $f3;
                             <br><br>
                             <p class="alert_txt">'.$login_error.'</p>
                         </div>
-                            <p id="reg_txt">Еще нет учетной записи? <a href="'.$f3->get("SITE_DOMAIN").'regist/'.'">Зарегистрироваться</a></p>
+                            <p id="reg_txt">Еще нет учетной записи? <a href="'.static::$f3->get("SITE_DOMAIN").'regist/'.'">Зарегистрироваться</a></p>
                         </form>
                     </div>
                 </div>
@@ -180,7 +180,7 @@ global $f3;
             return '
             <div class="flex_c_r_ac welcome">
                 <div id="signin_form" class="ComeIn">
-                    <form action="regist.php" method="POST" class="LogIn">	
+                    <form action="'.static::$f3->get("SITE_DOMAIN").'" method="POST" class="LogIn">	
                         <h2 class="LogInTxt" id="serverInfo">Регистрация</h2>
                         <div class="group">      
                         <input id="s_n" class="UserIn" name="name" type="text" required>
@@ -202,7 +202,7 @@ global $f3;
                         <br><br>
                         <p class="alert_txt">'.$html_txt.'</p>
                         </div>
-                        Уже зарегистрированы? <a href="'.$f3->get("SITE_DOMAIN").'">Войти</a><br><br>
+                        Уже зарегистрированы? <a href="'.static::$f3->get("SITE_DOMAIN").'">Войти</a><br><br>
                     </form>
                 </div>
             </div>
@@ -229,7 +229,7 @@ global $f3;
                             Н: <span class="italyc_txt">'.date('d.m.Y H:i:s',strtotime($test['start'])).'</span><br>
                             К:  <span class="italyc_txt">'.date('d.m.Y H:i:s',strtotime($test['end'])).'</span>
                         </p>
-                        <a href="'.$f3->get("SITE_DOMAIN").'test/'.$test['link'].'">Ссылка для прохождения</>
+                        <a href="'.static::$f3->get("SITE_DOMAIN").'test/'.$test['link'].'">Ссылка для прохождения</>
                     </div>
                     <div class="flex_fe_r_ac">
                         <div class="test_btn mr_r_10">
@@ -255,32 +255,35 @@ global $f3;
             
             return '
             <div class="flex_se_r_afe content flex_wrr">
+            '.($visual_data['u']['access'] > 1 ? '
                 <div class="u_t">
-                    <div class="note">
-                        <div class="tst_srch">
-                            <form method="GET" action="blog.php" class="flex_c_r" id="test_search">
-                                <input type="text" required name="user_search" placeholder="'.$visual_data['s_ut'].'">
-                                <button type="submit"><img src="search.png"></button>
-                            </form>
-                        </div>
-                    </div>
-                
-                    <div class="note">
-                        <div class="flex_sb_r_ac">
-                            <h2>Ваши тесты</h2>
-                            <div class="flex_sb_r_ac">
-                                <div class="test_btn mr_r_10">
-                                    <a title="Создать новый" href="editor/0/"><img alt="Создать новый тест" src="add_test.svg"></a>
-                                </div>
-                                <div class="test_btn">
-                                    <a title="Загрузить существующий" тест href=""><img alt="Загрузить существующий тест" src="upl_test.svg"></a>
-                                </div>
+                        <div class="note">
+                            <div class="tst_srch">
+                                <form method="GET" action="blog.php" class="flex_c_r" id="test_search">
+                                    <input type="text" required name="user_search" placeholder="'.$visual_data['s_ut'].'">
+                                    <button type="submit"><img src="search.png"></button>
+                                </form>
                             </div>
                         </div>
-                        <hr>
-                        '.$ut_html.'
+                    
+                        <div class="note">
+                            <div class="flex_sb_r_ac">
+                                <h2>Ваши тесты</h2>
+                                <div class="flex_sb_r_ac">
+                                    <div class="test_btn mr_r_10">
+                                        <a title="Создать новый" href="editor/0/"><img alt="Создать новый тест" src="add_test.svg"></a>
+                                    </div>
+                                    <div class="test_btn">
+                                        <a title="Загрузить существующий" тест href=""><img alt="Загрузить существующий тест" src="upl_test.svg"></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            '.$ut_html.'
+                        </div>
                     </div>
-                </div>
+                ':'').'
+                
                 <div class="u_t">
                     <div class="note">
                         <div class="flex_c_r">
@@ -388,7 +391,7 @@ global $f3;
                     <br><br>
                 </p>
                 
-                <a href="'.$f3->get("SITE_DOMAIN").'">Выйти из редактора</a>
+                <a href="'.static::$f3->get("SITE_DOMAIN").'">Выйти из редактора</a>
             </div>
             
             <div id="ex2" class="modal">
@@ -800,7 +803,7 @@ global $f3;
                         $html.=$this->_GetDetailResultWrap($k,$v);
                     }
                         $html.='
-                        <a title="Пройти тест еще раз" id="add_qst_btn" class="qst_btn" href="'.$f3->get("SITE_DOMAIN").'test/'.$res_data[0]['link'].'"><img alt="Пройти тест" src="add_test.svg"></a>      
+                        <a title="Пройти тест еще раз" id="add_qst_btn" class="qst_btn" href="'.static::$f3->get("SITE_DOMAIN").'test/'.$res_data[0]['link'].'"><img alt="Пройти тест" src="add_test.svg"></a>      
                     </div>
                 ';
                 $html.='</div>';
@@ -869,9 +872,9 @@ global $f3;
                 
                 <div class="note">
                 <div class="tst_srch">
-                        <form method="GET" action="'.$f3->get("SITE_DOMAIN").'statistics/'.$res_data[0]['link'].'" class="flex_c_r">
+                        <form method="GET" action="'.static::$f3->get("SITE_DOMAIN").'statistics/'.$res_data[0]['link'].'" class="flex_c_r">
                             <input type="text" required name="results_search" placeholder="'.$visual_data['s_rslts'].'">
-                            <button type="submit"><img src="'.$f3->get("SITE_DOMAIN").'search.png"></button>
+                            <button type="submit"><img src="'.static::$f3->get("SITE_DOMAIN").'search.png"></button>
                         </form>
                         
                     </div>
@@ -905,7 +908,7 @@ global $f3;
                         '.$err_txt.'
                     </p>
                     <br>
-                    <a href="'.$f3->get("SITE_DOMAIN").'">Обратно в профиль</a>
+                    <a href="'.static::$f3->get("SITE_DOMAIN").'">Обратно в профиль</a>
                 </div>
                 ';
         }
@@ -937,7 +940,7 @@ global $f3;
         protected function _GetResultWrap($v)
         {
             return '
-                <a class="flex_sb_r_ac flex_wr test_line mr_t_10" href="'.$f3->get("SITE_DOMAIN").'check/'.$v['link'].'">
+                <a class="flex_sb_r_ac flex_wr test_line mr_t_10" href="'.static::$f3->get("SITE_DOMAIN").'check/'.$v['link'].'">
                     <p class="fs12_txt">'.$v['title'].'</p>
                     <p>'.date('d.m.Y H:i:s',strtotime($v['date'])).'</p>
                     '.(
@@ -963,7 +966,7 @@ global $f3;
             foreach ($css_a as $v) {
                 if(!in_array($v,$this->css)){
                     $this->css[]=$v;
-                    $this->view_links.='<link rel="stylesheet" type="text/css" href="'.(str_contains($v,'http')?'':$f3->get("SITE_DOMAIN")).$v.'">';
+                    $this->view_links.='<link rel="stylesheet" type="text/css" href="'.(str_contains($v,'http')?'':static::$f3->get("SITE_DOMAIN")).$v.'">';
                 }
             }
         }
@@ -977,7 +980,7 @@ global $f3;
             foreach ($js_a as $v) {
                 if(!in_array($v,$this->js)){
                     $this->js[]=$v;
-                    $this->view_links.='<script src="'.(str_contains($v,'http')?'':$f3->get("SITE_DOMAIN")).$v.'"></script>';
+                    $this->view_links.='<script src="'.(str_contains($v,'http')?'':static::$f3->get("SITE_DOMAIN")).$v.'"></script>';
                 }
             }
         }

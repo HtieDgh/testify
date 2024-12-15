@@ -2,7 +2,7 @@ $(document).ready(function(){
     $('.EnterBtn').click(function(e){
         e.preventDefault();
         $.post(
-            '../new',
+            'regist/new',
             {
                 name:$('#s_n').val(),
                 login:$('#s_l').val(),
@@ -13,9 +13,9 @@ $(document).ready(function(){
                 let msg=JSON.parse(data);
                 if(!msg['err']){
                     alert('Учетная запись зарегестрирована! Сейчас вы будете перенаправлены в свой профиль');
-                    location.href='../';
+                    location.href='./';
                 }else{
-                    $('.alert_txt').append(msg['err_txt']);
+                    $('.alert_txt').html(msg['err_txt']);
                 }
             }
         );

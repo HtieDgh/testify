@@ -170,3 +170,6 @@ user_data/
 
 # tmp files of framework
 tmp/
+
+# development help files
+chlgsample.lnk

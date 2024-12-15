@@ -53,20 +53,37 @@ class Security
 	 * <p>Регистрирует пользователя в системе</p>
 	 * @return array массив return_out - для JSON ответа
 	*/
-	public function registUser(&$login,&$pass,&$name)
+	public static function registUser($db,$login,$pass,$name)
 	{
 		$return_out['err']=FALSE;
 		$cur_date=date('Y-m-d');
 		$return_out['err_txt']='';
 		//Проверка на существующую учетную запись в БД
-		$q="SELECT 1 FROM `s_a` WHERE `name`='$name' OR `login`='$login'";
-		$result=queryMysql($q);
+		$q="SELECT 1 FROM s_a WHERE name=:name OR login=:login";
+		
+		$result = $db->exec($q,
+			array(
+				":name"=>$name,
+				":login"=>$login,
+			)
+		);
+
 		if(count($result)==0){
-			$q="INSERT INTO `s_a` (`id`, `login`, `pass`,`name`,`access`,`created`) VALUES (NULL,?, ?, ?,1,'$cur_date')";
-			$return_out['err_txt']=preparedQuery($q,array('sss', $login,$pass,$name),'Учетная запись зарегистрирована! Введите свой email и пароль <a href="'.SITE_DOMAIN.'">здесь</a></p>');
+			$q="INSERT INTO s_a (login, pass,name,access,created) VALUES (?, ?, ?,1,'$cur_date')";
+
+			$res=$db->exec(
+				$q,
+				array(
+					
+						$login,
+						$pass,
+						$name						
+				)
+			);
+			
 			//Обновление куки для последующей авторизации
-			$this->updateCookie('security_login',$login,"/",$_SERVER['HTTP_HOST'],TRUE);
-			$this->updateCookie('security_password',$pass,"/",$_SERVER['HTTP_HOST'],TRUE);
+			static::updateCookie('security_login',$login,"/",$_SERVER['HTTP_HOST'],TRUE);
+			static::updateCookie('security_password',$pass,"/",$_SERVER['HTTP_HOST'],TRUE);
 		}else{
 			$return_out['err']=TRUE;
 			$return_out['err_txt']='Учетная запись с таким логином или именем уже занята! Попробуйте снова';
@@ -75,18 +92,6 @@ class Security
 	}
 
 
-	
-	public function getUserInfo($id=0){
-		queryMysql("SET lc_time_names = 'ru_UA'");
-		$id=$id===0?$this->user_data['id']:$id;
-		$query="SELECT DATE_FORMAT(`created`,'%e %M %Y')as 'frmtd_created',s.`ava`,s.`status` FROM `s_a` as s WHERE  s.`id`=".$id;
-		$result=queryMysql($query);
-		$rec=$result->fetch_assoc();
-		$this->user_data['created']=$rec['frmtd_created'];
-		$this->user_data['ava_url']=$rec['ava'];
-		$this->user_data['status']=$rec['status'];
-		return $this->user_data;
-	}
 	/**
 	 * <p>Обновляет cookie</p>
 	 * 
