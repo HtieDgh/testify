@@ -26,7 +26,7 @@
           <mxGeometry y="156" width="140" height="26" as="geometry" />
         </mxCell>
         <mxCell id="HcKqTVsdb6viHk0sIlYB-8" value="Тест" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="540" y="170" width="140" height="182" as="geometry" />
+          <mxGeometry x="540" y="182" width="140" height="182" as="geometry" />
         </mxCell>
         <mxCell id="HcKqTVsdb6viHk0sIlYB-9" value="*id" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="HcKqTVsdb6viHk0sIlYB-8">
           <mxGeometry y="26" width="140" height="26" as="geometry" />
@@ -47,7 +47,7 @@
           <mxGeometry y="156" width="140" height="26" as="geometry" />
         </mxCell>
         <mxCell id="HcKqTVsdb6viHk0sIlYB-15" value="Результат" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="540" width="140" height="130" as="geometry" />
+          <mxGeometry x="540" y="26" width="140" height="130" as="geometry" />
         </mxCell>
         <mxCell id="HcKqTVsdb6viHk0sIlYB-16" value="*id" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="HcKqTVsdb6viHk0sIlYB-15">
           <mxGeometry y="26" width="140" height="26" as="geometry" />
@@ -148,9 +148,6 @@
             <mxPoint x="240" y="359.55" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="HcKqTVsdb6viHk0sIlYB-44" value="&lt;div style=&quot;font-size: 9px;&quot;&gt;Ссылка - уникальная последовательность для прохождения конкретного варианта теста&lt;/div&gt;" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=center;fontSize=9;" vertex="1" parent="1">
-          <mxGeometry x="717" y="300" width="110" height="80" as="geometry" />
-        </mxCell>
         <mxCell id="HcKqTVsdb6viHk0sIlYB-45" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1" source="HcKqTVsdb6viHk0sIlYB-46" target="HcKqTVsdb6viHk0sIlYB-20">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="840" y="340.00428571428574" as="sourcePoint" />
@@ -158,7 +155,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="HcKqTVsdb6viHk0sIlYB-46" value="&lt;div style=&quot;font-size: 9px;&quot;&gt;Статус видеофайла - Ответ на вопрос: Будет ли он воспроизведен сразу или будет ли это требовать от пользователя выбора ответа&lt;/div&gt;" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=center;fontSize=9;" vertex="1" parent="1">
-          <mxGeometry x="717" y="520" width="110" height="110" as="geometry" />
+          <mxGeometry x="717" y="555" width="110" height="110" as="geometry" />
         </mxCell>
         <mxCell id="HcKqTVsdb6viHk0sIlYB-47" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1" source="HcKqTVsdb6viHk0sIlYB-44" target="HcKqTVsdb6viHk0sIlYB-60">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
@@ -172,10 +169,13 @@
             <mxPoint x="460" y="210" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="HcKqTVsdb6viHk0sIlYB-49" value="" style="endArrow=ERone;html=1;rounded=0;fontSize=11;strokeWidth=1.5;endFill=0;startArrow=ERoneToMany;startFill=0;" edge="1" parent="1" target="HcKqTVsdb6viHk0sIlYB-8">
+        <mxCell id="HcKqTVsdb6viHk0sIlYB-49" value="" style="endArrow=ERone;html=1;rounded=0;fontSize=11;strokeWidth=1.5;endFill=0;startArrow=ERoneToMany;startFill=0;edgeStyle=elbowEdgeStyle;" edge="1" parent="1" target="HcKqTVsdb6viHk0sIlYB-60" source="HcKqTVsdb6viHk0sIlYB-15">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="610" y="130" as="sourcePoint" />
             <mxPoint x="440" y="210" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="760" y="260" />
+            </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="HcKqTVsdb6viHk0sIlYB-50" value="" style="endArrow=ERone;html=1;rounded=0;fontSize=11;strokeWidth=1.5;endFill=0;startArrow=ERoneToMany;startFill=0;edgeStyle=elbowEdgeStyle;" edge="1" parent="1" source="HcKqTVsdb6viHk0sIlYB-15" target="HcKqTVsdb6viHk0sIlYB-1">
@@ -247,6 +247,15 @@
             <mxPoint x="990" y="240" as="sourcePoint" />
             <mxPoint x="1120" y="383" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="HcKqTVsdb6viHk0sIlYB-65" value="" style="endArrow=ERone;html=1;rounded=0;fontSize=11;strokeWidth=1.5;endFill=0;startArrow=ERoneToMany;startFill=0;edgeStyle=elbowEdgeStyle;" edge="1" parent="1" source="HcKqTVsdb6viHk0sIlYB-8" target="HcKqTVsdb6viHk0sIlYB-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="564" y="172" as="sourcePoint" />
+            <mxPoint x="414" y="198" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="HcKqTVsdb6viHk0sIlYB-44" value="&lt;div style=&quot;font-size: 9px;&quot;&gt;Ссылка - уникальная последовательность для прохождения конкретного варианта теста&lt;/div&gt;" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=center;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="717" y="280" width="110" height="80" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
