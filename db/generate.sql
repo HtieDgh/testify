@@ -115,7 +115,7 @@ ALTER SEQUENCE public.question_id_seq OWNED BY public.question.id;
 CREATE TABLE public.result (
     id integer NOT NULL,
     s_a_id integer NOT NULL,
-    test_id integer NOT NULL,
+    variant_id integer NOT NULL,
     date timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     status boolean DEFAULT false NOT NULL,
     sum integer DEFAULT 0 NOT NULL
@@ -232,8 +232,7 @@ CREATE TABLE public.test (
     description character varying NOT NULL,
     "limit" smallint NOT NULL,
     start timestamp with time zone NOT NULL,
-    "end" timestamp with time zone NOT NULL,
-    link character(32) NOT NULL
+    "end" timestamp with time zone NOT NULL
 );
 
 
@@ -262,16 +261,52 @@ ALTER SEQUENCE public.test_id_seq OWNED BY public.test.id;
 
 
 --
--- Name: test_question; Type: TABLE; Schema: public; Owner: db_course
+-- Name: variant; Type: TABLE; Schema: public; Owner: db_course
 --
 
-CREATE TABLE public.test_question (
-    test_id integer,
+CREATE TABLE public.variant (
+    id integer NOT NULL,
+    test_id integer NOT NULL,
+    title character varying NOT NULL,
+    link character(32)
+);
+
+
+ALTER TABLE public.variant OWNER TO db_course;
+
+--
+-- Name: variant_id_seq; Type: SEQUENCE; Schema: public; Owner: db_course
+--
+
+CREATE SEQUENCE public.variant_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.variant_id_seq OWNER TO db_course;
+
+--
+-- Name: variant_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: db_course
+--
+
+ALTER SEQUENCE public.variant_id_seq OWNED BY public.variant.id;
+
+
+--
+-- Name: variant_question; Type: TABLE; Schema: public; Owner: db_course
+--
+
+CREATE TABLE public.variant_question (
+    variant_id integer,
     question_id integer
 );
 
 
-ALTER TABLE public.test_question OWNER TO db_course;
+ALTER TABLE public.variant_question OWNER TO db_course;
 
 --
 -- Name: answer id; Type: DEFAULT; Schema: public; Owner: db_course
@@ -316,6 +351,13 @@ ALTER TABLE ONLY public.test ALTER COLUMN id SET DEFAULT nextval('public.test_id
 
 
 --
+-- Name: variant id; Type: DEFAULT; Schema: public; Owner: db_course
+--
+
+ALTER TABLE ONLY public.variant ALTER COLUMN id SET DEFAULT nextval('public.variant_id_seq'::regclass);
+
+
+--
 -- Data for Name: answer; Type: TABLE DATA; Schema: public; Owner: db_course
 --
 
@@ -343,7 +385,7 @@ COPY public.question_file (q_id, file_name, mime) FROM stdin;
 -- Data for Name: result; Type: TABLE DATA; Schema: public; Owner: db_course
 --
 
-COPY public.result (id, s_a_id, test_id, date, status, sum) FROM stdin;
+COPY public.result (id, s_a_id, variant_id, date, status, sum) FROM stdin;
 \.
 
 
@@ -352,6 +394,13 @@ COPY public.result (id, s_a_id, test_id, date, status, sum) FROM stdin;
 --
 
 COPY public.s_a (id, login, pass, name, access, created) FROM stdin;
+1	test@test	098f6bcd4621d373cade4e832627b4f6	Создатель теста	2	2024-06-17
+2	testm@test	098f6bcd4621d373cade4e832627b4f6	Михаил	1	2024-07-09
+3	testi@test	098f6bcd4621d373cade4e832627b4f6	Иванов	1	2024-07-09
+4	testp@test	098f6bcd4621d373cade4e832627b4f6	Петров	1	2024-07-11
+5	tests@test	098f6bcd4621d373cade4e832627b4f6	Сидоров	1	2024-07-11
+6	test_manager@test	098f6bcd4621d373cade4e832627b4f6	Менеджер	3	2024-11-17
+7	testdad@test	098f6bcd4621d373cade4e832627b4f6	dad	1	2024-12-15
 \.
 
 
@@ -367,15 +416,24 @@ COPY public.saved_answer (id, res_id, question_id, answer_id, descriptor) FROM s
 -- Data for Name: test; Type: TABLE DATA; Schema: public; Owner: db_course
 --
 
-COPY public.test (id, s_a_id, title, description, "limit", start, "end", link) FROM stdin;
+COPY public.test (id, s_a_id, title, description, "limit", start, "end") FROM stdin;
+1	1	delete	this	1	2024-12-18 16:32:00+03	2024-12-25 16:32:00+03
 \.
 
 
 --
--- Data for Name: test_question; Type: TABLE DATA; Schema: public; Owner: db_course
+-- Data for Name: variant; Type: TABLE DATA; Schema: public; Owner: db_course
 --
 
-COPY public.test_question (test_id, question_id) FROM stdin;
+COPY public.variant (id, test_id, title, link) FROM stdin;
+\.
+
+
+--
+-- Data for Name: variant_question; Type: TABLE DATA; Schema: public; Owner: db_course
+--
+
+COPY public.variant_question (variant_id, question_id) FROM stdin;
 \.
 
 
@@ -404,7 +462,7 @@ SELECT pg_catalog.setval('public.result_id_seq', 1, false);
 -- Name: s_a_id_seq; Type: SEQUENCE SET; Schema: public; Owner: db_course
 --
 
-SELECT pg_catalog.setval('public.s_a_id_seq', 1, false);
+SELECT pg_catalog.setval('public.s_a_id_seq', 7, true);
 
 
 --
@@ -422,11 +480,26 @@ SELECT pg_catalog.setval('public.test_id_seq', 1, false);
 
 
 --
+-- Name: variant_id_seq; Type: SEQUENCE SET; Schema: public; Owner: db_course
+--
+
+SELECT pg_catalog.setval('public.variant_id_seq', 1, false);
+
+
+--
 -- Name: answer answer_pk; Type: CONSTRAINT; Schema: public; Owner: db_course
 --
 
 ALTER TABLE ONLY public.answer
     ADD CONSTRAINT answer_pk PRIMARY KEY (id);
+
+
+--
+-- Name: variant link_unique; Type: CONSTRAINT; Schema: public; Owner: db_course
+--
+
+ALTER TABLE ONLY public.variant
+    ADD CONSTRAINT link_unique UNIQUE (link);
 
 
 --
@@ -478,19 +551,19 @@ ALTER TABLE ONLY public.saved_answer
 
 
 --
--- Name: test test_link_key; Type: CONSTRAINT; Schema: public; Owner: db_course
---
-
-ALTER TABLE ONLY public.test
-    ADD CONSTRAINT test_link_key UNIQUE (link);
-
-
---
 -- Name: test test_pkey; Type: CONSTRAINT; Schema: public; Owner: db_course
 --
 
 ALTER TABLE ONLY public.test
     ADD CONSTRAINT test_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: variant variant_pkey; Type: CONSTRAINT; Schema: public; Owner: db_course
+--
+
+ALTER TABLE ONLY public.variant
+    ADD CONSTRAINT variant_pkey PRIMARY KEY (id);
 
 
 --
@@ -502,10 +575,10 @@ ALTER TABLE ONLY public.saved_answer
 
 
 --
--- Name: test_question q_tq; Type: FK CONSTRAINT; Schema: public; Owner: db_course
+-- Name: variant_question q_tq; Type: FK CONSTRAINT; Schema: public; Owner: db_course
 --
 
-ALTER TABLE ONLY public.test_question
+ALTER TABLE ONLY public.variant_question
     ADD CONSTRAINT q_tq FOREIGN KEY (question_id) REFERENCES public.question(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
@@ -558,19 +631,27 @@ ALTER TABLE ONLY public.test
 
 
 --
--- Name: test_question t_tq; Type: FK CONSTRAINT; Schema: public; Owner: db_course
+-- Name: variant_question v_vq; Type: FK CONSTRAINT; Schema: public; Owner: db_course
 --
 
-ALTER TABLE ONLY public.test_question
-    ADD CONSTRAINT t_tq FOREIGN KEY (test_id) REFERENCES public.test(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY public.variant_question
+    ADD CONSTRAINT v_vq FOREIGN KEY (variant_id) REFERENCES public.variant(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- Name: result test_result; Type: FK CONSTRAINT; Schema: public; Owner: db_course
+-- Name: result variant_result; Type: FK CONSTRAINT; Schema: public; Owner: db_course
 --
 
 ALTER TABLE ONLY public.result
-    ADD CONSTRAINT test_result FOREIGN KEY (test_id) REFERENCES public.test(id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT variant_result FOREIGN KEY (variant_id) REFERENCES public.variant(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: variant variant_test_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: db_course
+--
+
+ALTER TABLE ONLY public.variant
+    ADD CONSTRAINT variant_test_id_fkey FOREIGN KEY (test_id) REFERENCES public.test(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

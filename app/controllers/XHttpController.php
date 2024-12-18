@@ -105,67 +105,135 @@ class XHttpController
         echo json_encode($return_out);
     }
     /**
-     * <p>Сохранение/изменение нового теста</p>
+     * <p>Изменение/Сохранение нового теста</p>
     */
-    public function newTest($f3,$params=NULL) {
+    public function editTest($f3,$params=NULL) {
         global $db;
         $return_out['err']=FALSE;
         $return_out['err_txt']='';
 
         $log_err_txt=Security::loginTest($f3,$db);
-        if( $f3->get('user.access')>1 )
-        {                    
-            if (isset($_POST['test_data']))
-            {
-                $_POST=sanitizeString($_POST);
-                $json_str_test=htmlspecialchars_decode(htmlspecialchars_decode($_POST['test_data']));
-                
-                $test_data=json_decode($json_str_test,TRUE);
-                
-                if($test_data!==null)
-                {
-                    $t=new Tests($db);
-                //Вставка в бд данных о тесте и генерация уникальной link 
-                    $t->DeleteTest($test_data['link']);
-
-                    $test_struct=$t->AddTest($test_data,$f3->get('user.id'),$f3->get('user.name'));
-                    $return_out['link']=SITE_DOMAIN.'test/'.$test_struct['link'];
-                //Сохранение загруженных файлов
-                    
-                    $upl=new U($user->user_data);
-                    
-                //Вставка json_str в папку с тестом
-                    if( $upl->UploadJSONTestData($json_str_test, $test_struct['link']) !== FALSE )
-                    {
-                    //Генерация архива и ссылки на него
-                        $test_path=$upl->file_dir.$test_struct['link'].'/';
-                    //Ссылка на архив теста для загрузки на стороне пользователя
-                        $link = $test_path.'test_'.date('is').'.zip';
-
-                        Zip::zipDir($test_path, $link);
-
-                        $return_out['test_file_link']=SITE_DOMAIN.$link;
-                        
-                    }else{
-                        $return_out['err']=TRUE;
-                        $return_out['err_txt'].=' Ошибка при сохранении JSON данных теста, проверьте кодировку или попробуйте снова';
-                    }
-                
-
-                }else {
-                    $return_out['err']=TRUE;
-                    $return_out['err_txt'].='Ошибка парсинга файла JSON: Смените кодировку на UTF8.';
-                }
-            }else {
-                $return_out['err']=TRUE;
-                $return_out['err_txt'].='Ошибка при передаче данных теста. Попробуйте снова.';
-            }
-        }else {
+        if( $f3->get('user.access')<=1 )
+        {
             $return_out['err']=TRUE;
             $return_out['err_txt'].=$log_err_txt;
+            echo json_encode($return_out);
+            exit;
+        }
+        if (!isset($_POST['test_data']))
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt'].='Ошибка при передаче данных теста. Попробуйте снова.';
+            echo json_encode($return_out);
+            exit;
+        }
+        if($params['variant_link']!=='0'){
+            if( !$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id')) )
+            {
+                $return_out['err']=TRUE;
+                $return_out['err_txt'].='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию или закройте данное окно и попробуйте создать свой тест.';
+                echo json_encode($return_out);
+                exit;
+            }
         }
         
+        $_POST=CFuns::sanitizeString($_POST);
+        $json_str_test=htmlspecialchars_decode(htmlspecialchars_decode($_POST['test_data']));
+        
+        $test_data=json_decode($json_str_test,TRUE);
+
+        if($test_data===null)
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt'].='Ошибка парсинга файла JSON: Смените кодировку на UTF8.';
+            echo json_encode($return_out);
+            exit;
+        }
+        //Ошибки обработаны, выполенение запроса к БД:
+        $t=new Tests($db);
+            
+        switch ($test_data['test_cu']) {
+            case 'new':
+                //Создание нового теста
+                $t->createTest($test_data,$f3->get('user.id'));
+                break;
+            case 'old':
+                //Изменение существующего
+                $t->updateTest($test_data);
+                break;
+            default:
+                $return_out['err']=TRUE;
+                $return_out['err_txt'].='Ошибка при сохранении теста, орбатитесь к администратору';
+                echo json_encode($return_out);
+                break;
+        }
         echo json_encode($return_out);
+        exit;       
+    }
+    /**
+     * <p>Удаление теста</p>
+    */
+    public function deleteTest($f3,$params=NULL) {
+        global $db;
+        $return_out['err']=FALSE;
+        $return_out['err_txt']='';
+
+        $log_err_txt=Security::loginTest($f3,$db);
+        if( $f3->get('user.access')<=1 )
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt'].=$log_err_txt;
+            echo json_encode($return_out);
+            exit;
+        }
+        if ( !preg_match("/[^0-9]/",$params['test_id']) )
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt'].='Ошибка при передаче данных теста. Попробуйте снова.';
+            echo json_encode($return_out);
+            exit;
+        }
+        if($params['variant_link']!=='0'){
+            if( !$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id')) )
+            {
+                $return_out['err']=TRUE;
+                $return_out['err_txt'].='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию или закройте данное окно и попробуйте создать свой тест.';
+                echo json_encode($return_out);
+                exit;
+            }
+        }
+
+    }
+
+    function makeJSONtoFolderTest() {
+        
+                
+        $t->DeleteTest($test_data['link']);
+
+        $test_struct=$t->AddTest($test_data,$f3->get('user.id'),$f3->get('user.name'));
+        $return_out['link']=SITE_DOMAIN.'test/'.$test_struct['link'];
+    //Сохранение загруженных файлов
+        
+        $upl=new U($user->user_data);
+        
+    //Вставка json_str в папку с тестом
+        if( $upl->UploadJSONTestData($json_str_test, $test_struct['link']) !== FALSE )
+        {
+        //Генерация архива и ссылки на него
+            $test_path=$upl->file_dir.$test_struct['link'].'/';
+        //Ссылка на архив теста для загрузки на стороне пользователя
+            $link = $test_path.'test_'.date('is').'.zip';
+
+            Zip::zipDir($test_path, $link);
+
+            $return_out['test_file_link']=SITE_DOMAIN.$link;
+            
+        }else{
+            $return_out['err']=TRUE;
+            $return_out['err_txt'].=' Ошибка при сохранении JSON данных теста, проверьте кодировку или попробуйте снова';
+        }
+    
     }
 }
+
 ?>

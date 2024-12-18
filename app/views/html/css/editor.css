@@ -38,7 +38,7 @@
   margin: 0 auto;
 }
 
-  .confirm_edit_btn {
+  .confirm_edit_btn,.confirm_edit_btn_alt {
     display: block;
     min-width: 50%;
     box-sizing: border-box;
@@ -57,12 +57,15 @@
     border: 4px solid var(--btn-alt-txt-color);
     color: var(--btn-alt-txt-color);   
   }
+  .confirm_edit_btn_alt{
+    border: 4px dashed var(--alert-txt-color);
+  }
     @media(max-width:600px){
       .confirm_edit_btn{
           min-width: 80%
       }
     }
-		.confirm_edit_btn:hover, .confirm_edit_btn_disabled{
+		.confirm_edit_btn:hover, .confirm_edit_btn_alt:hover, .confirm_edit_btn_disabled{
 			background: var(--btn-bg-color);
 			color:var(--btn-txt-color);
 			transition: all 200ms;

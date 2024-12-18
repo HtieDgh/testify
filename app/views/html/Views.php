@@ -225,17 +225,17 @@
                             Н: <span class="italyc_txt">'.date('d.m.Y H:i:s',strtotime($test['start'])).'</span><br>
                             К:  <span class="italyc_txt">'.date('d.m.Y H:i:s',strtotime($test['end'])).'</span>
                         </p>
-                        <a href="'.static::$f3->get("SITE_DOMAIN").'test/'.$test['link'].'">Ссылка для прохождения</>
+                        <a href="'.static::$f3->get("SITE_DOMAIN").'test/TODO">Ссылка для прохождения</>
                     </div>
                     <div class="flex_fe_r_ac">
                         <div class="test_btn mr_r_10">
-                            <a title="Статистика прохождения теста" href="statistics/'.$test['link'].'/"><img alt="Статистика" src="stat_test.svg"></a>
+                            <a title="Статистика прохождения теста" href="statistics/TODO/"><img alt="Статистика" src="stat_test.svg"></a>
                         </div>
                         <div class="test_btn mr_r_10">
-                            <a title="Изменить тест"  href="editor/'.$test['link'].'/"><img alt="Изменить" src="change_test.svg"></a>
+                            <a title="Изменить тест"  href="editor/TODO/"><img alt="Изменить" src="change_test.svg"></a>
                         </div>
                         <div class="test_btn">
-                            <a title="Удалить тест" class="test_del_btn" href="delete_test/'.$test['link'].'/"><img alt="Удалить" src="minus_test.svg"></a>
+                            <a title="Удалить тест" class="test_del_btn" href="delete_test/TODO/"><img alt="Удалить" src="minus_test.svg"></a>
                         </div>
                     </div>
                 </div>
@@ -267,7 +267,7 @@
                                 <h2>Ваши тесты</h2>
                                 <div class="flex_sb_r_ac">
                                     <div class="test_btn mr_r_10">
-                                        <a title="Создать новый" href="editor/0/"><img alt="Создать новый тест" src="add_test.svg"></a>
+                                        <a title="Создать новый" href="edit/test/0"><img alt="Создать новый тест" src="add_test.svg"></a>
                                     </div>
                                     <div class="test_btn">
                                         <a title="Загрузить существующий" тест href=""><img alt="Загрузить существующий тест" src="upl_test.svg"></a>
@@ -330,14 +330,52 @@
                 ''
             );
         }
-        
         /**
          * <p>Возвращает DOMString Редактора теста. Для идентификации ответа в закрытом вопросе: 1(вопрос)_1(id ответа)_qst_answ</p>
          * @param array Данные теста которые необходимо отредактировать.
-         * @param string Сообщение об ошибке
          * @return string
         */
-        public function Editor($td=null,$err_txt='')
+        public function TestEditor($td=null){
+            $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','editor.css']);
+            $this->_setJs(['jquery-3.3.1.js','editTest.js']);
+            $html='';
+            if(isset($td))
+            {
+                //Возврат разметки для уже существующего теста
+                //Заголовок теста
+                $html.=$this->_getEditorTestTitle($td['test']);
+
+            }else{
+                //Возврат разметки для нового теста
+                //Заголовок теста
+                $html.=$this->_getEditorTestTitle();
+            }
+            $html='<div class="content">
+                <div>
+                    <p class=" ar_txt">Шаг 1/4</p>
+                </div>
+                '.$html.'
+                <div class="note">
+                    <div class="flex_c_r ">
+                        <a href="'.static::$f3->get("SITE_DOMAIN").'" id="confirm_edit_btn" class="confirm_edit_btn ac_txt">Следующий шаг</a>
+                    </div>  
+                </div>
+                <div class="note">
+                    <div class="flex_c_r ">
+                        <a href="'.static::$f3->get("SITE_DOMAIN").'" id="cancel_edit_btn" class="confirm_edit_btn_alt ac_txt">Отмена</a>
+                    </div>
+                </div>
+            </div>'.$this->_GetErrWrap('');
+            return $html;
+        }
+
+
+        /**
+         * <p>Возвращает DOMString Редактора теста. Для идентификации ответа в закрытом вопросе: 1(вопрос)_1(id ответа)_qst_answ</p>
+         * @param array Данные теста которые необходимо отредактировать.
+         * @return string
+        */
+        public function Editor($td=null)
         {
          
             $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','editor.css','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.css','modal.css']);
@@ -404,21 +442,56 @@
             ';
             return $html;
         }
+        /**
+         * <p>Возвращает разметку для варианта теста</p>
+         * @param array test_data['variant'] - данные варианта теста cu - новый или старый вариант. учавствует в create или в update
+         * @return string DOMString
+        */
+        protected function _getEditorVariant($var=null)
+        {
+            if($var===null){
+                $test=[
+                    'title'=>'',
+                    'cu'=>'new',
+                ];
+            }
+            return '
+            <div class="note">
+                <div class="flex_c_r">
+                    <form class="decor" method="post" action="/">
+                        <div class="form-inner">
+                        
+                            <h3 class="italyc_txt">Название варианта теста</h3><br>
+                            <input id="test_title" class="fs12_txt" type="text" name="test_title" placeholder="Название Варианта" value="'.$var['title'].'" required>
+                            <br>
+                            <p class="fs12_txt">
+                                Название варианта может быть любым. Рекомендуется выбирать название в форме <span class="italyc_txt">Вариант <Номер варианта></span>
+                            </p> 
+           
+                            <input type="hidden" id="test_cu" value="'.$var['cu'].'">
+                            
+                        </div>
+                    </form>
+                </div>
+            </div>
+            ';
+        }
       /**
          * <p>Возвращает заголовок редактора теста</p>
-         * @param array test_data['test'] - данные заголовка теста
+         * @param array test_data['test'] - данные заголовка теста test_cu - новый или старый тест
          * @return string DOMString
         */
         protected function _getEditorTestTitle($test=null)
         {
             if($test===null){
                 $test=[
-                    'link'=>'',
+                    'id'=>'0',
                     'title'=>'',
                     'limit'=>'1',
                     'description'=>'',
                     'start'=>date("Y-m-d H:i"),
-                    'end'=>date("Y-m-d H:i",time()+60*60*24*7)
+                    'end'=>date("Y-m-d H:i",time()+60*60*24*7),
+                    'cu'=>'new'
                 ];
             }
             return '<div class="note">
@@ -440,7 +513,9 @@
                                     <input type="datetime-local" id="start" name="start" value="'.$test['start'].'" min="'.date("Y-m-d H:i").'" max="'.date(DATE_ATOM,time()+60*60*24*365).'">
                                     <p class="mr_l_10">по:</p>
                                     <input type="datetime-local" id="end" name="end" value="'.$test['end'].'" min="'.date("Y-m-d H:i").' max="'.date("Y-m-d H:i",time()+60*60*24*365).'">
-                                    <input type="hidden" name="test_link" id="test_link" value="'.$test['link'].'">
+                                    <br>
+                                    <input type="hidden" id="test_cu" value="'.$test['cu'].'">
+                                    <input type="hidden" id="test_id" value="'.$test['id'].'">
                                 </div>
                             </form>
                         </div>
@@ -818,8 +893,7 @@
             if($err_txt!=='')
             {
                 $html.=$this->_GetErrWrap($err_txt);
-                $this->_setJs(['jquery-3.3.1.js','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.js']);
-                $this->_setCss(['https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.css']);
+
             }
             if($res_data==null)
             {
@@ -901,10 +975,11 @@
          */
         protected function _GetErrWrap($err_txt)
         {
-          
+            $this->_setJs(['jquery-3.3.1.js','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.js']);
+            $this->_setCss(['https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.css']);
             return '
                 <div id="err_wrap" class="modal">
-                    <p>
+                    <p id="exept_txt">
                         '.$err_txt.'
                     </p>
                     <br>

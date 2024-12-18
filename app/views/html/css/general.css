@@ -97,6 +97,9 @@ body{
     .al_txt{
         text-align:left;
     }
+    .ar_txt{
+        text-align:right;
+    }
     .ac_txt{
         text-align:center;
     }
@@ -111,6 +114,9 @@ body{
         width: 100%;
         padding-top: 100px;
     }
+        .w_100{
+            width: 100%;
+        }
 /*Шапка*/
 header {
     position: fixed;

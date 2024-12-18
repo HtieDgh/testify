@@ -4,15 +4,68 @@ class Tests{
     public function __construct(&$db) {
         static::$db=$db;
     }
+     /**
+     * <p> Принимает test_data и добавляет тест в бд</p>
+     * @param array td - данные о тесте 
+     * @param array user_id - автор теста
+     * @return bool результат $db->exec()
+     */ 
+    public function createTest($td,$user_id) {
+        $q="SELECT MAX(id) as \"max_id\" FROM test";
+        $cur_test_id=intval(static::$db->exec($q)[0]['max_id']);
+        $cur_test_id++;
+        $q_t="INSERT INTO test (
+            id,
+            s_a_id,
+            title,
+            \"description\",
+            \"limit\",
+            \"start\",
+            \"end\"
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        return static::$db->exec($q_t,
+        [
+            $cur_test_id,
+            $user_id,
+            $td['title'],
+            $td['description'],
+            $td['limit'],
+            $td['test_start'],
+            $td['test_end']
+        ]);
+    }
+    /**
+     * <p> Принимает test_data и обновляет тест в бд</p>
+     * @param array td - данные о тесте 
+     * @return bool результат $db->exec()
+     */ 
+    public function updateTest($td) {
 
+        $q_t="UPDATE test 
+        SET title=?,
+         \"description\"=?
+         \"limit\"=? 
+         \"start\"=?,
+         \"end\"=?
+        WHERE id=?";
+        return static::$db->exec($q_t,
+        [
+            $td['title'],
+            $td['description'],
+            $td['limit'],
+            $td['test_start'],
+            $td['test_end'],
+            $td['test_id']
+        ]);
+    }
     /**
      * <p> Принимает test_data и добавляет тест в бд</p>
-     * @param array td - данные о тесте вопросах ив ариантах ответов
+     * @param array td - данные о тесте вопросах и вариантах ответов
      * @param array user_id
      * @param array user_name
      * @return array ассоциативный массив с id тестом и уникальным индентификатор-ссылкой для прохождения теста
     */
-    public function AddTest($td,$user_id,$user_name)
+    /* public function AddTest($td,$user_id,$user_name)
     {
         
     //Получение различных ids для создоваемого теста
@@ -121,22 +174,41 @@ class Tests{
             $cur_qst_id++;
         }
         return ['link'=>$test_link,'test_id'=>$cur_test_id];
-    }
+    } */
     /**
-     * <p>Возвращает список тестов, которых создал пользователь</p>
+     * <p>Возвращает список тестов или теста, которых создал пользователь</p>
      * @param int user_id - id пользователя
      * @return array ассоциативный массив с полями результата
     */
     public function GetUserTests($user_id){
-        return static::$db->exec("SELECT id,title,link,start,\"end\" FROM test WHERE s_a_id=$user_id");
+        return static::$db->exec("SELECT 
+        id,title,start,\"end\"
+        FROM test
+        WHERE s_a_id=$user_id
+        ");
     }
+    public function GetUserTest($variant_link){
+        $test_data['err']=FALSE;
+        $test_data['err_txt']='';
+        $test_data['test'] = static::$db->exec("SELECT t.* FROM test t INNER JOIN variant v ON t.id=v.test_id WHERE v.link='$variant_link'");
+        if (count($test_data['test']) == 0) {
+            $test_data['err']=TRUE;
+            $test_data['err_txt']='Ошибка: Данных теста не найдено';
+        }
+        return  $test_data;
+    }
+    public function makeOldTest($test_data){
+        $test_data['cu']='old';
+        return $test_data;
+    }
+
     /**
      * <p>Возвращает все данные теста, созданого пользователем, включая вопросы, ответы и файлы</p>
      * @param int test_id - id теста
      * 
      * @return array ассоциативный массив test_data с полями результата запроса на получение даных о тесте. Сожержит поле err и err_txt которое указывает на ошибку
     */
-    public function GetFullUserTest($test_link,$author_ids=-1){
+   /*  public function GetFullUserTest($test_link,$author_ids=-1){
         $test_data['test'] = static::$db->exec("SELECT * FROM test WHERE link='$test_link'");
         $test_data['err']=FALSE;
 
@@ -157,14 +229,17 @@ class Tests{
         }
         
         return $test_data;
-    }
+    } */
+
+
+
     /**
-     * <p>Возвращает все вопросы созданые пользователем(-лями)</p>
+     * <p> TODO   Возвращает все вопросы созданые пользователем(-лями)</p>
      * @param string mode - режим работы для одного пользователя или для всех
      * @param int page - номер страницы в списке
      * @return array ассоциативный массив test_data с полями результата запроса на обьединение. Сожержит поле err и err_txt которое указывает на ошибку
      */ 
-    public function GetUserQuestions($mode,$page=1) {
+    /* public function GetUserQuestions($mode,$page=1) {
         $test_data['test'] = static::$db->exec("SELECT * FROM test WHERE link='$test_link'");
         $test_data['err']=FALSE;
         $limit='LIMIT '.($page*10-10).',10';
@@ -174,14 +249,14 @@ class Tests{
                     "SELECT * FROM question q
                     INNER JOIN test_question t_q ON t_q.question_id=q.id
                     INNER JOIN test t ON t_q.test_id=t.id
-                    WHERE t.s_a_id=${author_id}
-                    ${limit}"
+                    WHERE t.s_a_id=$author_id
+                    $limit"
                 );
                 break;
             case 'all':
                 $test_data['a_question']=static::$db->exec(
                     "SELECT * FROM question q
-                    ${limit}"
+                    $limit"
                 );
                 break;
             default:
@@ -194,18 +269,21 @@ class Tests{
             // Получение всех вопросов для выбора в меню вопросов. Только те вопросы которы создал пользователь ранее
             
         }
-    }
+    } */
     
 
     /**
      * <p>Проверяет является ли автором теста по ссылке пользователь с переданым id</p>
-     * @param string test_link
+     * @param string variant_link
      * @param int user_id
      * @return bool Истина если автор теста - это пользователь с переданным id
     */
-    public function CheckTestAuthor_link($test_link,$user_id)
+    public function CheckTestAuthor_link($variant_link,$user_id)
     {
-        $res=static::$db->exec("SELECT s_a_id FROM test WHERE link='$test_link'");
+        $res=static::$db->exec("SELECT s_a_id 
+        FROM test t INNER JOIN variant v ON t.id=v.test_id 
+        WHERE v.link='$variant_link'
+        ");
         return count($res)>0 && $user_id==$res[0]['s_a_id'];
     }
 
@@ -381,16 +459,17 @@ class Tests{
     public function GetUserResults($user_id){
         return static::$db->exec("SELECT 
         t.title,
-        t.link,
+        v.link,
         r.status,
         r.date
         FROM test t
-        INNER JOIN result r ON r.test_id=t.id
+        INNER JOIN result r ON r.variant_id=t.id
+        INNER JOIN variant v ON v.test_id=t.id
         WHERE r.s_a_id=$user_id AND r.date =(
             SELECT 
             _r.date
             FROM result _r
-            WHERE _r.s_a_id=$user_id AND _r.test_id=t.id
+            WHERE _r.s_a_id=$user_id AND _r.variant_id=v.id
             ORDER BY _r.status DESC, _r.date DESC LIMIT 1
         )
         "

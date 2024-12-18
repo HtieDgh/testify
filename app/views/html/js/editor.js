@@ -305,7 +305,7 @@ $(document).ready(function(){
                     }
                     
                 }
-                function fn_onCompleteFilesLoad(params) {
+                function fn_onCompleteFilesLoad() {
                     let fd2=new FormData();
                     //Включение test_data в форму отправки
                    fd2.append('test_data',JSON.stringify(getTestData()));

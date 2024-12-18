@@ -173,3 +173,4 @@ tmp/
 
 # development help files
 chlgsample.lnk
+db/make_generate_sql.bat
