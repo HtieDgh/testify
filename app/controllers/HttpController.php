@@ -60,7 +60,6 @@ class HttpController
 				),
 			);
 		}
-		/* echo Template::instance()->render('layout.htm'); */
 	}
 	/**
      * <p>Редактирование данных теста (без вопросов) в интерфейсе будет шаг 1/4</p>
@@ -74,7 +73,7 @@ class HttpController
 			// Пользователь найден
 			$test_data=null;
 			$err_txt='';
-			
+			$vd=null;
 			if(!preg_match("/[^0-9a-z_]/",$params["variant_link"]))
 			{
 			// Определение: редактирование существующего или создание нового теста	
@@ -86,13 +85,14 @@ class HttpController
 					{
 						$test_data=$t->makeOldTest($t->GetUserTest($params["variant_link"]));
 						$err_txt=$test_data['err_txt'];
-						
+						$vd=$t->GetTestVariants($params["variant_link"]);
 					}else{
 						$err_txt='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию или закройте данное окно и попробуйте создать свой тест.';
 					}
+					
 				}
 			}else{
-				$err_txt='Произошла ошибка при получении данных теста. Повторите операцию или закройте данное окно и создайте новый тест';
+				$err_txt='Произошла ошибка при получении данных теста. Повторите операцию или создайте новый тест';
 			}
 			if($err_txt!==''){
 				$f3->reroute("/".$err_txt);
@@ -104,7 +104,9 @@ class HttpController
 				'Редактор - Testify',
 				$v->BodyMainPage(
 				$v->Header(TRUE),
-				[$v->TestEditor($test_data)],
+				[
+					$v->TestEditor($test_data,$vd)
+				],
 				$v->Footer()
 				)
 			);

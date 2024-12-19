@@ -331,30 +331,28 @@
             );
         }
         /**
-         * <p>Возвращает DOMString Редактора теста. Для идентификации ответа в закрытом вопросе: 1(вопрос)_1(id ответа)_qst_answ</p>
+         * <p>Возвращает DOMString Редактора теста.
          * @param array Данные теста которые необходимо отредактировать.
+         * @param array Данные Вариантов которые необходимо отредактировать.
          * @return string
         */
-        public function TestEditor($td=null){
+        public function TestEditor($td=null,$vd=null){
             $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','editor.css']);
             $this->_setJs(['jquery-3.3.1.js','editTest.js']);
             $html='';
-            if(isset($td))
+            if(!isset($td))
             {
-                //Возврат разметки для уже существующего теста
-                //Заголовок теста
-                $html.=$this->_getEditorTestTitle($td['test']);
-
-            }else{
+                $td['test']=null;
+            }
+            $html.=$this->_getEditorTestTitle($td['test']); 
                 //Возврат разметки для нового теста
                 //Заголовок теста
-                $html.=$this->_getEditorTestTitle();
-            }
             $html='<div class="content">
                 <div>
-                    <p class=" ar_txt">Шаг 1/4</p>
+                    <p class=" ar_txt">Шаг 1/3</p>
                 </div>
                 '.$html.'
+                '.$this->variantEditor($vd).'
                 <div class="note">
                     <div class="flex_c_r ">
                         <a href="'.static::$f3->get("SITE_DOMAIN").'" id="confirm_edit_btn" class="confirm_edit_btn ac_txt">Следующий шаг</a>
@@ -365,9 +363,46 @@
                         <a href="'.static::$f3->get("SITE_DOMAIN").'" id="cancel_edit_btn" class="confirm_edit_btn_alt ac_txt">Отмена</a>
                     </div>
                 </div>
+                
             </div>'.$this->_GetErrWrap('');
             return $html;
         }
+        /**
+         * <p>Возвращает DOMString Редактора Варианта.
+         * @param array Данные Варианта которые необходимо отредактировать.
+         * @return string
+        */
+        public function variantEditor($vd,$test_id=0) {
+            $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','editor.css']);
+            $this->_setJs(['jquery-3.3.1.js','editTest.js']);
+            if(!isset($vd)){
+                $vd=array();
+            }
+            $html='            
+            <div class="note">
+            <div class="flex_c_r">
+                <form class="decor" method="post" action="/">
+                    <div class="form-inner">
+                    
+                        <h3 class="italyc_txt">Варианты теста</h3>
+                        <p>
+                            Название варианта может быть любым. Рекомендуется выбирать название в форме <span class="italyc_txt">Вариант <Номер варианта></span>
+                        </p> 
+                        <br><br>';
+            foreach ($vd as $k=>$v) {
+                $html.=$this->_getEditorVariant($v,$test_id,$k);
+            }
+            $html.='<a  title="Добавить вариант теста" class="qst_btn add_answ_btn" href="'.$test_id.'"><img alt="Добавить вариант теста" src="add_test.svg"></a>
+            
+                    </div>
+                </form>
+            </div>
+            </div>
+            ';
+            return $html;
+        }
+
+
 
 
         /**
@@ -441,40 +476,6 @@
             </div>
             ';
             return $html;
-        }
-        /**
-         * <p>Возвращает разметку для варианта теста</p>
-         * @param array test_data['variant'] - данные варианта теста cu - новый или старый вариант. учавствует в create или в update
-         * @return string DOMString
-        */
-        protected function _getEditorVariant($var=null)
-        {
-            if($var===null){
-                $test=[
-                    'title'=>'',
-                    'cu'=>'new',
-                ];
-            }
-            return '
-            <div class="note">
-                <div class="flex_c_r">
-                    <form class="decor" method="post" action="/">
-                        <div class="form-inner">
-                        
-                            <h3 class="italyc_txt">Название варианта теста</h3><br>
-                            <input id="test_title" class="fs12_txt" type="text" name="test_title" placeholder="Название Варианта" value="'.$var['title'].'" required>
-                            <br>
-                            <p class="fs12_txt">
-                                Название варианта может быть любым. Рекомендуется выбирать название в форме <span class="italyc_txt">Вариант <Номер варианта></span>
-                            </p> 
-           
-                            <input type="hidden" id="test_cu" value="'.$var['cu'].'">
-                            
-                        </div>
-                    </form>
-                </div>
-            </div>
-            ';
         }
       /**
          * <p>Возвращает заголовок редактора теста</p>
@@ -739,6 +740,37 @@
             return $html;
         }
         
+        /**
+         * <p>Возвращает разметку Варианта для Редактора теста</p>
+        * @param int $vd - данные варианта
+        * @param int $test_id - текущий id теста
+        * @param int $cur_num=1 - текущий номер варианта
+        * 
+        * @return string DOMstring
+        * 
+        * @see VariantEditor()
+        */
+        protected function _getEditorVariant($vd,$test_id,$cur_num=1){
+
+            return '
+
+            <div class="'.$test_id.'_var flex_fs_r_ac">
+                                    
+                <span class="fs14_txt answ_number mr_r_10">$cur_num</span>
+                <textarea rows="1" class=" mr_r_10" name="'.$q['id'].'_'.
+                $k.'_qst_answ" placeholder="Название Варианта" value="'.
+                $vd['title'].'" required>'.$vd['title'].'</textarea>
+                
+                <input type="hidden" name="var_cu" class="var_cu"  value="'.$vd['cu'].'">
+                
+                <a title="Удалить вариант теста" class="qst_btn_alt del_answ_btn" href="'.$q['id'].'"><img alt="Удалить вариант теста" src="minus_test.svg"></a>
+            
+            </div>
+            ';
+
+        }
+
+
         /**
          * <p>Возвращает разметку вопроса для Плеера теста</p>
          *

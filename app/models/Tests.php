@@ -191,6 +191,7 @@ class Tests{
         $test_data['err']=FALSE;
         $test_data['err_txt']='';
         $test_data['test'] = static::$db->exec("SELECT t.* FROM test t INNER JOIN variant v ON t.id=v.test_id WHERE v.link='$variant_link'");
+
         if (count($test_data['test']) == 0) {
             $test_data['err']=TRUE;
             $test_data['err_txt']='Ошибка: Данных теста не найдено';
@@ -201,7 +202,16 @@ class Tests{
         $test_data['cu']='old';
         return $test_data;
     }
-
+    public function GetTestVariants($variant_link) {
+        return static::$db->exec("SELECT v.* 
+        FROM variant v 
+        WHERE v.test_id IN(
+            SELECT _t.id 
+            FROM test _t 
+            INNER JOIN variant _v ON _t.id=_v.test_id 
+            WHERE _v.link='$variant_link')
+        ");
+    }
     /**
      * <p>Возвращает все данные теста, созданого пользователем, включая вопросы, ответы и файлы</p>
      * @param int test_id - id теста
