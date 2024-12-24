@@ -28,11 +28,26 @@ class HttpController
 		}else{
 			//Отображение Профиля, если пользователь прошел аутентификацию
 			$t=new Tests($db);
+			$view_data['sr_cancel']='';
+			$view_data['st_cancel']='';
 			$view_data['u']=$f3->get("user");
 			$view_data['u']['ava_url']=$f3->get("SITE_DOMAIN").'user_avas/default_ava.png';
-			$view_data['ur']=$t->GetUserResults($f3->get("user.id"));
-			$view_data['s_ur']='Поиск по вашим попыткам';//TODO
+			
+			if(isset($_GET['s_ur'])){
+				$view_data['s_ur']=$_GET['s_ur'];
+				$s_ur=$_GET['s_ur'];
+				$view_data['sr_cancel']='Отменить поиск';
+			}else{
+				$s_ur='';
+				$view_data['s_ur']='Поиск по вашим попыткам';//TODO
+			}
+			$view_data['ur']=$t->GetUserResults(
+				$f3->get("user.id"),
+				Tests::GetWhere($s_ur,['t.title','r.status::text','r.date::text'])
+			);
 			$view_data['err_txt']=$err_txt;
+
+
 			// В зависимости от уровня доступа шаблону нужны разные данные для отображения
 			switch ($view_data['u']['access']) {
 				case 1: // Роль Участник теста
@@ -40,8 +55,18 @@ class HttpController
 					$view_data['ut'] = array();
 					break;
 				case 2:// Роль Создатель теста
-					$view_data['s_ut'] = 'Поиск по созданным вами тестам';//TODO
-					$view_data['ut'] = $t->GetUserTests($f3->get("user.id"));
+					if(isset($_GET['s_ut'])){
+						$view_data['s_ut']=$_GET['s_ut'];
+						$s_ut=$_GET['s_ut'];
+						$view_data['st_cancel']='Отменить поиск';
+					}else{
+						$s_ut='';
+						$view_data['s_ut']='Поиск по созданным вами тестам';
+					}
+					$view_data['ut'] = $t->GetUserTests(
+						$f3->get("user.id"),
+						Tests::GetWhere($s_ut,['title','"start"::text','"end"::text'])
+					);
 					break;
 				case 3: // Роль Менеджер
 					$view_data['s_aut'] = 'Поиск по всем созданым тестам';//TODO
@@ -68,7 +93,15 @@ class HttpController
 	{
 		global $db;
 		$logErrTxt=Security::loginTest($f3,$db);
-		
+		$log_err_txt=Security::loginTest($f3,$db);
+        if( $f3->get('user.access')==0 )
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt']=$log_err_txt;
+            echo json_encode($return_out);
+            exit;
+        }
+
 		if($f3->get("user.access")>1){
 			// Пользователь найден
 			$test_data=null;
@@ -130,7 +163,7 @@ class HttpController
 			$f3->reroute("/".urlencode("Перед тем как использовать Редактор, Вам необходимо Войти"));
 		}
 		// Пользователь найден
-		if(preg_match("/[^0-9a-z_]/",$params["variant_link"]))
+		if(preg_match("/[^0-9a-z]/",$params["variant_link"]) || $params["variant_link"]=='0')
 		{
 			$f3->reroute("/".'Произошла ошибка при получении данных теста. Повторите операцию или создайте новый тест');
 		}
@@ -152,7 +185,39 @@ class HttpController
 			$v->Footer()
 			)
 		);
+	}
+	/**
+	 * <p>Плеер для теста</p>
+	*/
+	public function testPage($f3,$params=NULL) {
+		global $db;
+		Security::loginTest($f3,$db);
+        if( $f3->get('user.access')==-1 )
+        {
+           $f3->reroute('/','Прежде чем проходить тест вам необходимо войти');
+        }
+		if(preg_match("/[^0-9a-z]/",$params["variant_link"]) || $params["variant_link"]=='0')
+		{
+			$f3->reroute("/".'Произошла ошибка при получении данных теста. Повторите операцию или откройте другой вариант');
+		}
 
+		$t=new Tests($db);
+		//Получение данных о вопросах/варианте/тесте
+		 $test_data=$t->GetFullUserTest($params["variant_link"]);
+		//Для ссылки на файлы теста необходим логин пользователя создавшего тест
+		 $author_login=$t->GetAuthorLogin($test_data['test']['id']);
+
+		$v=new Views($f3);
+		echo $v->Htmlrender(
+			'Тестирование - Testify',
+			$v->BodyMainPage(
+			$v->Header(TRUE),
+			[
+				$v->Test( $test_data, Uploads::GetUserPath($f3->get('SITE_DOMAIN').$f3->get('user_test_data_path'),$author_login).$test_data['variant']['link'] )
+			],
+			$v->Footer()
+			)
+		);
 	}
 
 	/**
@@ -168,10 +233,95 @@ class HttpController
 		$t=new Tests($db);
 		$f3->reroute("/edit/test/".$t->GetAllTestVariants_tid($params["test_id"])[0]['link']);
     }
-    function profilePage()
+	/**
+	 * <p>Детализация одной попытки</p>
+	*/
+    public function checkResultPage($f3,$params=NULL)
 	{
+		global $db;
+		$logErrTxt=Security::loginTest($f3,$db);
+		
+		if($f3->get("user.access")<1){
+			//Пользователь не найден: переход на начальную страницу
+			$f3->reroute("/".urlencode("Перед тем как посмотреть попытки, Вам необходимо Войти"));
+		}
+		// Пользователь найден
+		if(preg_match("/[^0-9a-z]/",$params["variant_link"]) || $params["variant_link"]=='0')
+		{
+			$f3->reroute("/".'Произошла ошибка при получении данных варианта. Повторите операцию');
+		}
+		$t=new Tests($db);
+		$res_data=$t->GetUserTestResults($params["variant_link"],$f3->get('user.id'));
 
+		$v=new Views($f3);
+		echo $v->Htmlrender(
+			$res_data[0]['title'].': Результаты - Testify',
+			$v->BodyMainPage(
+			$v->Header(TRUE),
+			[$v->Check($res_data)],
+			$v->Footer()                  
+			)
+		);
     }
+	/**
+	 * <p>Просмотр статистики теста конкретного автора</p>
+	*/
+	public function statisticsPage($f3,$params=NULL) {
+		global $db;
+		$logErrTxt=Security::loginTest($f3,$db);
+		
+		if($f3->get("user.access")<=1){
+			//Пользователь не найден: переход на начальную страницу
+			$f3->reroute("/".urlencode("Перед тем как посмотреть статистику по тесту, Вам необходимо Войти"));
+		}
+		// Пользователь найден
+		if(preg_match("/[^0-9]/",$params["test_id"]) || $params["test_id"]=='')
+		{
+			$f3->reroute("/".'Произошла ошибка при получении индентификатора теста. Повторите операцию');
+		}
+		$res_data=null;
+		$visual_data['s_rslts']='Поиск по результатам';
+		$visual_data['s_cancel_btn']='';
+		//Только Менеджер или Создатель теста может смотреть статистику по конкретному тесту
+		$t=new Tests($db);
+
+		if(!$t->CheckTestAuthor_tid($params['test_id'],$f3->get('user.id')) ){
+            $f3->reroute("/".'Вы не авторизованы для выполнения данной операции');
+        }
+		//Обработка поискового запроса
+		 if(isset($_GET['results_search']))
+		 {
+			$_GET=CFuns::sanitizeString($_GET);
+			
+			$search=$_GET['results_search'];
+			$visual_data['s_rslts']=$search;
+			
+		 }else{
+			$search='';
+		 }
+		
+		$res_data=$t->GetTestStatistics_tid(
+			$params['test_id'],
+			[
+				'variants'=>Tests::GetWhere( $search, ['v.title'] ),
+				'results'=>Tests::GetWhere( $search, ['r.date::text','r.status::text','r.sum::text','s.name','v.title'] )
+			]  );
+
+		if($search!==''){
+			$visual_data['s_cancel_btn']='<a href="'.$f3->get("SITE_DOMAIN").'statistics/'.$params['test_id'].'">Отменить поиск</a>';
+		}
+		
+		//Вывод статистики
+		$v=new Views($f3);
+		echo $v->Htmlrender(
+			$res_data['test']['title'].': Статистика - Testify',
+			$v->BodyMainPage(
+			$v->Header(TRUE),
+			[$v->Statistics($visual_data,$res_data['test'],$res_data['variants'],$res_data['results'])],
+			$v->Footer()                
+			)
+		);
+	}
 	// Страница регистрации
 	public function registPage($f3,$params=NULL){
 		$v=new Views($f3);

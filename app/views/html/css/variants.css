@@ -1,0 +1,18 @@
+.editqv_btn,.editqv_btn-transparent{
+    text-decoration: none;
+    color: inherit;
+    border: 2px solid var(--high-bg-color);
+    border-radius: 3px;
+    box-sizing: border-box;
+    padding: 0.1em 0.3em;
+    display: block;
+  }
+    .editqv_btn-transparent{
+      visibility: hidden;
+    }
+
+.stat_variant:hover{
+    transition: all 100ms;
+        
+    background-color:var(--test-selection-color);
+}

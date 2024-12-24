@@ -49,7 +49,7 @@ $(document).ready(function(){
                 `<div class="`+t_id+`_test_var flex_fs_r_ac">
                               
                 <div class="flex_c_r_ac">
-                    <input type="radio" class="chosen_variant" name="variant" value="0">
+                    <input type="radio" class="chosen_variant mr_r_10" name="variant" value="0">
                     <span class="fs14_txt answ_number mr_r_10">`+v_count+`</span>
                 </div>
                     
@@ -57,10 +57,11 @@ $(document).ready(function(){
                     <textarea rows="1" class="title mr_r_10" name="0_id_var" placeholder="Название Варианта" value="" required></textarea>
                     
                     <a title="Удалить вариант теста" class="qst_btn_alt del_answ_btn" href="./../../delete/variant/0"><img alt="Удалить вариант теста" src="minus_test.svg"></a>
-                
+
+                    <a title="Количество вопросов в варианте" class="editqv_btn editqv_btn-transparent fs12_txt mr_l_10" href="">0</a>
                 </div>
                 `);
-            $('#'+t_id+'_v_count').val(v_count);
+            $('#v_countjs').val(v_count);
             //Плавное появление варианта 
             $('.'+t_id+'_test_var').animate({opacity:1},300);
             //Регистрация событий на click для новых элементов
@@ -82,10 +83,7 @@ $(document).ready(function(){
                     (data)=>{
                         console.log(data);
                         let msg=JSON.parse(data);
-                        if(msg['err']==false){ 
-                            test_wrap.remove();
-                            alert('Тест удален!');
-                        }else{
+                        if(msg['err']){ 
                             alert(msg['err_txt']);
                         }
                     });

@@ -6,10 +6,13 @@ class Uploads{
         $file_dir;
     //$ext - Допустимые форматы файлов. Сохранить можно только фото, аудио и видео.
 	public static $ext;
-
+	public static function GetUserPath($dir,$login)
+	{
+		return $dir.'/'.md5($login).'/';
+	}
 	public function __construct($user_test_data_path,$login){
 		
-		$this->file_dir=$user_test_data_path.'/'.md5($login).'/';
+		$this->file_dir=static::GetUserPath($user_test_data_path,$login);
 
         if(!is_dir($this->file_dir)) {
 			mkdir($this->file_dir, 0777, true);

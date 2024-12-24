@@ -225,7 +225,7 @@
                             Н: <span class="italyc_txt">'.date('d.m.Y H:i:s',strtotime($test['start'])).'</span><br>
                             К:  <span class="italyc_txt">'.date('d.m.Y H:i:s',strtotime($test['end'])).'</span>
                         </p>
-                        <a href="'.static::$f3->get("SITE_DOMAIN").'test/TODO">Ссылка для прохождения</>
+                        <a class="get_var_btn" href="'.static::$f3->get("SITE_DOMAIN").'variantslink/'.$test['id'].'">Ссылки для прохождения</>
                     </div>
                     <div class="flex_fe_r_ac">
                         <div class="test_btn mr_r_10">
@@ -255,11 +255,12 @@
                 <div class="u_t">
                         <div class="note">
                             <div class="tst_srch">
-                                <form method="GET" action="blog.php" class="flex_c_r" id="test_search">
-                                    <input type="text" required name="user_search" placeholder="'.$view_data['s_ut'].'">
+                                <form method="GET" action="'.static::$f3->get("SITE_DOMAIN").'" class="flex_c_r">
+                                    <input type="text" required name="s_ut" placeholder="'.$view_data['s_ut'].'">
                                     <button type="submit"><img src="search.png"></button>
                                 </form>
                             </div>
+                            '.($view_data['st_cancel']!=''?$this->_getCancelBtn($view_data['st_cancel']):'').'
                         </div>
                     
                         <div class="note">
@@ -291,11 +292,12 @@
                     </div>
                     <div class="note">
                         <div class="tst_srch">
-                            <form method="GET" action="" class="flex_c_r" id="result_search">
-                                <input type="text" required name="user_search" placeholder="'.$view_data['s_ur'].'">
+                            <form method="GET" action="'.static::$f3->get("SITE_DOMAIN").'" class="flex_c_r">
+                                <input type="text" required name="s_ur" placeholder="'.$view_data['s_ur'].'">
                                 <button type="submit"><img src="search.png"></button>
                             </form>
                         </div>
+                        '.($view_data['sr_cancel']!=''?$this->_getCancelBtn($view_data['sr_cancel']):'').'
                     </div>
                     <div class="note">
                         <div class="flex_sb_r_ac">
@@ -324,11 +326,14 @@
                 </div>
                 
             </div>
-            '.($view_data['err_txt']!=''? 
-                $this->_GetErrWrap($view_data['err_txt'])
-                :
-                ''
-            );
+            <div id="ex_variants" class="modal">
+                <p>
+                    Названия вариантов и их ссылки для прохождения:
+                </p>
+                <br>
+                <textarea rows="3" class="w_100" name="varlinks" placeholder="Название Варианта" value=""></textarea>
+            </div>
+            '.$this->_GetErrWrap($view_data['err_txt']);
         }
         /**
          * <p>Возвращает DOMString Редактора теста.
@@ -337,7 +342,7 @@
          * @return string
         */
         public function TestEditor($td=null,$vd=null){
-            $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','editor.css']);
+            $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','editor.css','variants.css']);
             $this->_setJs(['jquery-3.3.1.js','editTest.js']);
 
                 //Возврат разметки для нового теста
@@ -726,7 +731,8 @@
         /**
          * <p>Возвращает разметку Плеера для теста</p>
          *
-         * @param null $test
+         * @param null $test_data
+         * @param null $user_path - путь до файлов автора теста
          * @param null $err_txt
          * 
          * @return string DOMString
@@ -737,9 +743,8 @@
             $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','test.css','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.css']);
             $this->_setJs(['jquery-3.3.1.js','test.js','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.js']);
             $html='';
-            if($err_txt!==''){
-                $html.=$this->_GetErrWrap($err_txt);
-            }
+            $html.=$this->_GetErrWrap($err_txt);
+
             if($test_data!=null){
                 $html.='
                     <div class="content">
@@ -747,8 +752,10 @@
                             <div class="flex_c_r">
                                 <form class="decor" action="">
                                     <div class="form-inner">
-                                    <input type="hidden" id="test_link" name="test_link" value="'.$test_data['test']['link'].'">
-                                        <h3 class="italyc_txt">'.$test_data['test']['title'].'</h3><br>
+                                    <input type="hidden" id="variant_link" name="variant_link" value="'.$test_data['variant']['link'].'">
+                                        <h3 class="italyc_txt">'.$test_data['test']['title'].'</h3>
+                                        <p class="ac_txt mr_t_10">Название варианта: '.$test_data['variant']['title'].'</p>
+                                        <br>
                                         <div class="flex_fe_r_ac">
                                             <p class="mr_r_10">Минимум баллов для прохождения:</p>
                                             <span>'.$test_data['test']['limit'].'</span>
@@ -776,19 +783,18 @@
                         </div>';
                         
                 $html.='<div >';
-
-                    $q_count = count($test_data['question']);
+                    $q_count = count($test_data['questions']);
 
                     for ($i=0; $i < $q_count; $i++)
                     { 
                         $html.=$this->_getTestQuestion(
-                            $test_data['question'][$i],
-                            $test_data['answers'][$test_data['question'][$i]['id']],
-                            $test_data['files'][$test_data['question'][$i]['id']],
-                            $user_path.$test_data['test']['link'],
+                            $test_data['questions'][$i],
+                            $test_data['answers'][$test_data['questions'][$i]['id']],
+                            $test_data['files'][$test_data['questions'][$i]['id']],
+                            $user_path,
                             $i+1,$q_count
                         );
-                        $q_ids[]=['id'=>$test_data['question'][$i]['id'],'is_open'=>$test_data['question'][$i]['is_open']];
+                        $q_ids[]=['id'=>$test_data['questions'][$i]['id'],'is_open'=>$test_data['questions'][$i]['is_open']];
                     }
                     
                 $html.='</div>
@@ -820,7 +826,7 @@
 
             <div class="'.$test_id.'_test_var flex_fs_r_ac">
                 <div class="flex_c_r_ac">
-                    <input type="radio" class="chosen_variant" name="variant" value="'.$vd['link'].'">
+                    <input type="radio" class="chosen_variant mr_r_10" name="variant" value="'.$vd['link'].'">
                     <span class="fs14_txt answ_number mr_r_10">'.$cur_num.'</span>
                 </div>               
 
@@ -831,12 +837,24 @@
 
 
                 <a title="Удалить вариант теста" class="qst_btn_alt del_answ_btn" href="./../../delete/variant/'.$vd['link'].'"><img alt="Удалить вариант теста" src="minus_test.svg"></a>
-            
+
+                <a title="Количество вопросов в варианте, нажмите для редактирования" class="editqv_btn fs12_txt mr_l_10" href="./../../edit/questions/'.$vd['link'].'">'.$vd['q_count'].'</a>
             </div>
             ';
-
         }
+        /**
+         * <p>Возвращает разметку Варианта для страницы статистики</p>
+        */
+        protected function _getStatisticsVariant($v_title,$v_link,$v_qount,$test_id,$cur_num=1){
+            return '<div class="flex_sb_r_ac stat_variant" data-href="./?results_search='.$v_title.'">
+                        <p class="fs14_txt answ_number mr_r_10">'.$cur_num.'</p> 
 
+                        <a href="'.static::$f3->get("SITE_DOMAIN").'statistics/'.$test_id.'?results_search='.$v_title.'" class="title mr_r_10">'.$v_title.'</a>
+
+                        <a title="Количество вопросов в варианте, нажмите для редактирования" class="editqv_btn fs12_txt mr_l_10" href="'.static::$f3->get("SITE_DOMAIN").'edit/questions/'.$v_link.'">'.$v_qount.'</a>
+                    </div>
+                    ';
+        }
 
         /**
          * <p>Возвращает разметку вопроса для Плеера теста</p>
@@ -870,15 +888,15 @@
                     $html.=' <div class="file_wrap mr_t_10">';
                     switch ($v['mime']) {
                         case 'image':
-                            $html.='<img src="../'.$test_path.'/'.$v['file_name'].'" alt="">';
+                            $html.='<img src="'.$test_path.'/'.$v['file_name'].'" alt="">';
                             break;
 
                         case 'audio':
-                            $html.='<audio src="../'.$test_path.'/'.$v['file_name'].'" controls></audio>';             
+                            $html.='<audio src="'.$test_path.'/'.$v['file_name'].'" controls></audio>';             
                             break;
 
                         case 'video':
-                            $html.='<video src="../'.$test_path.'/'.$v['file_name'].'" '.($q['is_vid_hidden']==1?'class="invis " id="'.$q['id'].'_'.$k.'_v"':'').' controls></video>';
+                            $html.='<video src="'.$test_path.'/'.$v['file_name'].'" '.($q['is_vid_hidden']==1?'class="invis " id="'.$q['id'].'_'.$k.'_v"':'').' controls></video>';
                             if($q['is_vid_hidden']==1){
                                 $html.='<a id="'.$q['id'].'_'.$k.'" href="" class="open_video_btn">Показать?</a>';
                             }
@@ -921,17 +939,19 @@
             </div>';
             return $html;
         }
-
-        public function Check($res_data,$err_txt='')
+        /**
+         * <p>Вывод всех попыток ползователя у конкретного варианта</p>
+        */
+        public function Check($res_data)
         {
             $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','check.css','editor.css']);
             
                 $html='';
-                if($err_txt!==''){
+ /*                if($err_txt!==''){
                     $html.=$this->_GetErrWrap($err_txt);
                     $this->_setJs(['jquery-3.3.1.js','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.js']);
                     $this->_setCss(['https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.css']);
-                }
+                } */
                 
                 $html.='
                 <div class="content">
@@ -941,6 +961,8 @@
                                 <div class="form-inner">
                                 
                                     <h3 class="italyc_txt">'.$res_data[0]['title'].'</h3><br>
+                                    <p class="ac_txt mr_t_10">Название варианта: '.$res_data[0]['v_title'].'</p>
+                                    <br>
                                     <div class="flex_fe_r_ac">
                                         <p class="mr_r_10">Минимум баллов для прохождения:</p>
                                         <span>'.$res_data[0]['limit'].'</span>
@@ -977,37 +999,21 @@
                         $html.=$this->_GetDetailResultWrap($k,$v);
                     }
                         $html.='
-                        <a title="Пройти тест еще раз" id="add_qst_btn" class="qst_btn" href="'.static::$f3->get("SITE_DOMAIN").'test/'.$res_data[0]['link'].'"><img alt="Пройти тест" src="add_test.svg"></a>      
+                        <a title="Пройти тест еще раз" id="add_qst_btn" class="qst_btn" href="'.static::$f3->get("SITE_DOMAIN").'test/'.$res_data[0]['v_link'].'"><img alt="Пройти тест" src="add_test.svg"></a>      
                     </div>
                 ';
                 $html.='</div>';
                 return $html;
         }
 
-        /* public function Statistics($view_data, $res_data, $err_txt='')
+        /**
+         * <p>Страница результатов попыток для автора теста</p>
+        */
+        public function Statistics($view_data, $test, $variants, $results=[])
         {
            
-            $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','check.css']);
+            $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','check.css','variants.css']);
             $html='';
-            if($err_txt!=='')
-            {
-                $html.=$this->_GetErrWrap($err_txt);
-
-            }
-            if($res_data==null)
-            {
-                $res_data=[
-                    0=>[
-                        'title'=>'',
-                        'limit'=>'_',
-                        'start'=>'_',
-                        'end'=>'_',
-                        'description'=>'_'
-                    ]
-                ];
-            }
-
-
             
             $html.='
             <div class="content">
@@ -1016,10 +1022,10 @@
                         <form class="decor" action="">
                             <div class="form-inner">
                             
-                                <h3 class="italyc_txt">'.$res_data[0]['title'].'</h3><br>
+                                <h3 class="italyc_txt">'.$test['title'].'</h3><br>
                                 <div class="flex_fe_r_ac">
                                     <p class="mr_r_10">Минимум баллов для прохождения:</p>
-                                    <span>'.$res_data[0]['limit'].'</span>
+                                    <span>'.$test['limit'].'</span>
                                 </div>
                                 <p class="ac_txt mr_t_10">Текущая дата: '.date('d.m.Y').' </p>
 
@@ -1027,11 +1033,11 @@
                                 <p class="ac_txt mr_t_10">Данный тест проводится</p>
                                 <div class="flex_sb_r_ac">
                                     <p class="mr_r_10">с: </p>
-                                    <span>'.date('d.m.Y H:i:s',strtotime($res_data[0]['start'])).'</span>
+                                    <span>'.date('d.m.Y H:i:s',strtotime($test['start'])).'</span>
                                 </div>
                                 <div class="flex_sb_r_ac">
                                     <p class="mr_r_10">по:</p>
-                                    <span>'.date('d.m.Y H:i:s',strtotime($res_data[0]['end'])).'</span>
+                                    <span>'.date('d.m.Y H:i:s',strtotime($test['end'])).'</span>
                                 </div>
 
                             </div>
@@ -1040,32 +1046,51 @@
                 </div>
                 <div class="note">
                     <p>Описание:</p>
-                    <p class="mr_t_10">'.$res_data[0]['description'].'</p>
+                    <p class="mr_t_10">'.$test['description'].'</p>
                 </div>
-                
                 <div class="note">
-                <div class="tst_srch">
-                        <form method="GET" action="'.static::$f3->get("SITE_DOMAIN").'statistics/'.$res_data[0]['link'].'" class="flex_c_r">
+                    <div class="tst_srch">
+                        <form method="GET" action="'.static::$f3->get("SITE_DOMAIN").'statistics/'.$test['test_id'].'" class="flex_c_r">
                             <input type="text" required name="results_search" placeholder="'.$view_data['s_rslts'].'">
                             <button type="submit"><img src="'.static::$f3->get("SITE_DOMAIN").'search.png"></button>
                         </form>
-                        
                     </div>
+                    '.($view_data['s_cancel']!=''?$this->_getCancelBtn($view_data['s_cancel']):'').'
+                </div>
+                <div class="note">
+                    <div class="flex_c_r">                            
+                        <h3 class="italyc_txt">Варианты теста</h3>
+                    </div>
+                    <hr>
+                    ';
+                    foreach ($variants as $k=>$v) {
+                        $html.=$this->_getStatisticsVariant($v['v_title'],$v['v_link'],$v['q_count'],$test['test_id'],$k+1);
+                    }
+                    
+                    $html.='
+                    
+                </div>
+            
+                <div class="note">
                     <br>
                     <div class="flex_sb_r_ac">
-                        <h2 class="mr_t_10">Результаты пользователей: '.$view_data['s_cancel_btn'].'</h2>
+                        <h2 class="mr_t_10">Результаты пользователей:</h2>
                         <p class="mr_r_10">Баллы</p>
                     </div>
                 <hr>
                 ';
-                foreach ($res_data as $k=>$v) {
+                foreach ($results as $k=>$v) {
                     $html.=$this->_GetDetailResultWrap($k,$v);
                 }
             $html.='</div>
             </div>';
             return $html;
-        } */
-
+        } 
+        protected function _getCancelBtn($t){
+            return '<div class="flex_c_r mr_t_10">
+                <a href="'.static::$f3->get("SITE_DOMAIN").'">'.$t.'</a>
+            </div>';
+        }
 
         /**
          * <p>Возвращает оболочку с текстом ошибки для вывода на стороне клиента</p>
@@ -1091,7 +1116,7 @@
             return '
                 <div class="flex_sb_r_ac flex_wr test_line mr_t_10">
                     <span class="fs14_txt">'.($k+1).'</span>
-                    '.(isset($v['user_name'])? '<p>'.$v['user_name'].'</p>' : '' ).'
+                    '.(isset($v['user_name'])? '<p>'.$v['user_name'].'</p><p>'.$v['v_title'].'</p>' : '' ).'
                     <p>'.date('d.m.Y H:i:s',strtotime($v['date'])).'</p>
                     '.(
                         $v['status']>0 ? 

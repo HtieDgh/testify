@@ -285,6 +285,7 @@ $(document).ready(function(){
                         downloadFile(m.test_file_link);
                         $('#confirm_edit_btn').html('Завершить редактирование');
                         $('#confirm_edit_btn').attr('href',"./../../");
+                        $('#confirm_edit_btn').off('click')
                     }else{
                         throw new Error(m.err_txt);
                     }

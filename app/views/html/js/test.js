@@ -1,6 +1,6 @@
 $(document).ready(function(){
     //==== Отображение текста ошибки от сервера если она есть ====
-if($('#err_wrap').length){
+if($('#exept_txt').val()!=''){
     $('#err_wrap').modal();
 }
     //TODO localStrorage
@@ -33,7 +33,7 @@ $('.start_test_btn').click(function(e) {
             $('#'+q_ids[q_iter].id+'_q audio:first-child')[0].play();
         }
     }
-    console.log(test_state);
+    console.log({t_state:test_state});
     switch (test_state) {
         case 0://Начало теста => отобразить первый вопрос
             test_state=1;
@@ -57,19 +57,19 @@ $('.start_test_btn').click(function(e) {
         case 2://Завершить тест
 
             $.post(
-                '../new_result/',
+                '../new/result/'+$('#variant_link').val(),
                 {
                     answ_data: getResult(),
-                    test_link: $('#test_link').val()
                 },
                 function (data) {
-                    $(this).html('Ошибка');
                     console.log(data);
+                    $(this).html('Ошибка');
                     let msg=JSON.parse(data);
                     if(!msg.err){
                         location.href=msg.result_link;
                     }else{
-                        alert(msg.err_txt);
+                        $('#err_wrap').modal();
+                        $('#exept_txt').html(msg.err_txt);
                     }
                     
                 }
@@ -91,7 +91,7 @@ $('.open_video_btn').click(function(e) {
 });
 
 function getResult() {
-    let q_it=0;
+
     let answ_data=[];
     
     for (let q_it = 0; q_it < q_ids.length; q_it++) 

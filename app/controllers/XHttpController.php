@@ -192,7 +192,7 @@ class XHttpController
             $t=new Tests($db);
             $upl=new Uploads($f3->get('user_test_data_path'),$f3->get('user.login'));
 
-            if( !$t->CheckTestAuthor_id($params['test_id'],$f3->get('user.id')) )
+            if( !$t->CheckTestAuthor_tid($params['test_id'],$f3->get('user.id')) )
             {
                 $return_out['err']=TRUE;
                 $return_out['err_txt']='Пользователь не авторизован для данной операции удаления';
@@ -345,6 +345,74 @@ class XHttpController
         echo json_encode($return_out);
     }
 
+    public function getVariantsLinks($f3,$params=null) {
+        global $db;
+        $return_out['err']=FALSE;
+        $return_out['err_txt']='';
+        $log_err_txt=Security::loginTest($f3,$db);
+        if( $f3->get('user.access')<=1 )
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt']=$log_err_txt;
+            echo json_encode($return_out);
+            exit;
+        }
+        if ( preg_match("/[^0-9]/",$params['test_id']) )
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt']='Передан невернный идентификатор теста';
+            echo json_encode($return_out);
+            exit;
+        }
+        $t=new Tests($db);
+        if(!$t->CheckTestAuthor_tid($params['test_id'],$f3->get('user.id'))){
+            
+            $return_out['err']=TRUE;
+            $return_out['err_txt']='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию.';
+            echo json_encode($return_out);
+            exit;
+        }
+        $return_out['variants']=$t->GetAllTestVariants_tid($params['test_id']);
+        $return_out['absolute']=$f3->get('SITE_DOMAIN');
+
+        echo json_encode($return_out);
+    }
+
+    /**
+     * <p>Регистарция попытки пройти тест</p>
+    */
+    public function newResult($f3,$params=null) {
+        global $db;
+        $return_out['err']=FALSE;
+        $return_out['err_txt']='';
+        $log_err_txt=Security::loginTest($f3,$db);
+        if( $f3->get('user.access')<=1 )
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt']=$log_err_txt;
+            echo json_encode($return_out);
+            exit;
+        }
+        if ( preg_match("/[^0-9a-z]/",$params['variant_link']) )
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt']='Передан невернный идентификатор варианта';
+            echo json_encode($return_out);
+            exit;
+        }
+        if (!isset($_POST['answ_data'])){
+            $return_out['err']=TRUE;
+            $return_out['err_txt']='Данные теста не преданы';
+            echo json_encode($return_out);
+            exit;
+        }
+        //Добавление новой попытки в БД
+         $t=new Tests($db);
+         $t->AddResult($params['variant_link'],$f3->get('user.id'),$_POST['answ_data']);
+         $return_out['result_link']=$f3->get('SITE_DOMAIN').'check/'.$params['variant_link'].'/';
+
+        echo json_encode($return_out);
+    }
 }
 
 ?>

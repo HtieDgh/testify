@@ -137,8 +137,8 @@ class Tests{
         $q="SELECT q.* FROM question q
         INNER JOIN variant_question v_q ON v_q.question_id=q.id
         INNER JOIN variant v ON v.id=v_q.variant_id
-        WHERE v.link='$variant_link'";
-        $quest_data['questions']=static::$db->exec($q);
+        WHERE v.link=?";
+        $quest_data['questions']=static::$db->exec($q,[$variant_link]);
         $quest_data['variant']=$this->GetTestVariant($variant_link);
         
         foreach ($quest_data['questions'] as $v) 
@@ -149,150 +149,38 @@ class Tests{
         return $quest_data;
     }
     /**
-     * <p> Принимает test_data и добавляет тест в бд</p>
-     * @param array td - данные о тесте вопросах и вариантах ответов
-     * @param array user_id
-     * @param array user_name
-     * @return array ассоциативный массив с id тестом и уникальным индентификатор-ссылкой для прохождения теста
-    */
-    /* public function CreateTest($td,$user_id,$user_name)
-    {
-        
-    //Получение различных ids для создоваемого теста
-   
-    $q="SELECT MAX(id) as 'max_id' FROM test";
-    $cur_test_id=intval(static::$db->exec($q)[0]['max_id']);
-
-    $q="SELECT MAX(id) as 'max_id' FROM question";
-    $cur_qst_id=intval(static::$db->exec($q)[0]['max_id']);
-
-    $q="SELECT MAX(id) as 'max_id' FROM answer";
-    $cur_answ_id=intval(static::$db->exec($q)[0]['max_id']);
-        
-
-        $test_link=md5($td['title'].$user_name);
-
-        $cur_test_id++;
-        $cur_qst_id++;
-        $cur_answ_id++;
-        $q_t="INSERT INTO test (
-            id,
-            s_a_id,
-            title,
-            description,
-            limit,
-            start,
-            end,
-            link
-        ) VALUES (?, ?, ?, ?, ?, ?, ?,?)";
-        $q_q="INSERT INTO question (
-            id,
-            test_id,
-            title,
-            text,
-            is_open,
-            is_vid_hidden
-        ) VALUES (?, ?, ?, ?, ?, ?)";
-        $q_qf="INSERT INTO question_file (
-            q_id,
-            file_name,
-            mime
-        ) VALUES (?, ?, ?)";
-        $q_a="INSERT INTO answer (
-            id,
-            question_id,
-            text,
-            price,
-            fine
-        ) VALUES (?, ?, ?, ?, ?)";
-
-    //Вставка Теста
-    
-        static::$db->exec($q_t,
-        [
-            $cur_test_id,
-            $user_id,
-            $td['title'],
-            $td['descript'],
-            $td['limit'],
-            $td['test_start'],
-            $td['test_end'],
-            $test_link
-        ]);
-
-    //Вставка Вопроов TODO
-       
-        foreach ($td['qsts'] as $k => $v) {
-        
-            preparedQuery($q_q,
-            [
-                "iissii",
-                $cur_qst_id,
-                $cur_test_id,
-                $v['title'],
-                $v['text'],
-                $v['type'],
-                $v['is_vid_hidden']
-            ]);
-
-        //Вставка в question_file
-
-            foreach ($v['file_names'] as $va) {
-                preparedQuery($q_qf,
-                ["iss",
-                $cur_qst_id,
-                $va['name'],
-                strstr($va['mime'],'/',TRUE)
-                ]);
-            }
-
-        //Вставка Ответов
-       
-            foreach ($v['answs'] as $va) {
-                preparedQuery($q_a,
-                [
-                    "iisii",
-                    $cur_answ_id,
-                    $cur_qst_id,
-                    $va['text'],
-                    $va['price'],
-                    $va['fine']
-                ]);
-
-                $cur_answ_id++;
-            }
-            $cur_qst_id++;
-        }
-        return ['link'=>$test_link,'test_id'=>$cur_test_id];
-    } */
-    /**
      * <p>Возвращает список тестов или теста, которых создал пользователь</p>
      * @param int user_id - id пользователя
+     * @param int where - секция where для поиска
      * @return array ассоциативный массив с полями результата
+     * @see GetWhere
     */
-    public function GetUserTests($user_id){
+    public function GetUserTests($user_id,$where=''){
         return static::$db->exec("SELECT 
-        id,title,start,\"end\"
-        FROM test
-        WHERE s_a_id=$user_id
-        ");
+            id,title,start,\"end\"
+            FROM test
+            WHERE s_a_id=? ".($where!=''?"AND($where)":''),
+            [$user_id]
+        );
     }
     public function GetUserTest($variant_link){
                
         return  static::$db->exec("SELECT t.* 
         FROM test t 
         INNER JOIN variant v ON t.id=v.test_id 
-        WHERE v.link='$variant_link'");
+        WHERE v.link=?",[$variant_link]);
     }
     public function GetAllTestVariants($variant_link) {
-        return static::$db->exec("SELECT v.* 
+        return static::$db->exec("SELECT v.*,COUNT(v_q.question_id) as q_count
         FROM variant v 
+        LEFT JOIN variant_question v_q ON v_q.variant_id=v.id
         WHERE v.test_id IN(
             SELECT _t.id 
             FROM test _t 
             INNER JOIN variant _v ON _t.id=_v.test_id 
-            WHERE _v.link='$variant_link')
-        ");
+            WHERE _v.link=?)
+        GROUP BY v_q.variant_id,v.id
+        ",[$variant_link]);
     }
 
     public function GetTestVariant($variant_link){
@@ -409,73 +297,31 @@ class Tests{
     }
 
     /**
-     * <p>Возвращает все данные теста, созданого пользователем, включая вопросы, ответы и файлы</p>
+     * <p>Возвращает все данные варианта теста, созданого пользователем, включая вопросы, ответы и файлы</p>
      * @param int test_id - id теста
      * 
      * @return array ассоциативный массив test_data с полями результата запроса на получение даных о тесте. Сожержит поле err и err_txt которое указывает на ошибку
     */
-   /*  public function GetFullUserTest($test_link,$author_ids=-1){
-        $test_data['test'] = static::$db->exec("SELECT * FROM test WHERE link='$test_link'");
+    public function GetFullUserTest($variant_link){
+        $test_data['test'] = static::$db->exec("SELECT t.*
+            FROM test t
+            INNER JOIN variant v ON v.test_id=t.id
+            WHERE v.link=?",
+            [$variant_link]
+        );
         $test_data['err']=FALSE;
 
         if (count($test_data['test']) == 0) {
             $test_data['err']=TRUE;
-            $test_data['err_txt']='Ошибка: такого теста не найдено';
+            $test_data['err_txt']='Ошибка: Тест не найден';
         }else{
             $test_data['test']=$test_data['test'][0];
         }
         // Получение вопросов теста
-        $test_data['question']=static::$db->exec(
-            "SELECT * FROM question q WHERE q.test_id=".$test_data['test']['id']
-        );
-       
-        foreach ($test_data['question'] as $v) {
-            $test_data['answers'][$v['id']]=static::$db->exec("SELECT * FROM answer a WHERE a.question_id=".$v['id']);
-            $test_data['files'][$v['id']]=static::$db->exec("SELECT qf.* FROM question_file qf  WHERE qf.q_id=".$v['id']);
-        }
+        $test_data=array_merge($test_data,$this->getQuestionData($variant_link));
         
         return $test_data;
-    } */
-
-
-
-    /**
-     * <p> TODO   Возвращает все вопросы созданые пользователем(-лями)</p>
-     * @param string mode - режим работы для одного пользователя или для всех
-     * @param int page - номер страницы в списке
-     * @return array ассоциативный массив test_data с полями результата запроса на обьединение. Сожержит поле err и err_txt которое указывает на ошибку
-     */ 
-    /* public function GetUserQuestions($mode,$page=1) {
-        $test_data['test'] = static::$db->exec("SELECT * FROM test WHERE link='$test_link'");
-        $test_data['err']=FALSE;
-        $limit='LIMIT '.($page*10-10).',10';
-        switch ($mode) {
-            case 'one':
-                $test_data['a_question']=static::$db->exec(
-                    "SELECT * FROM question q
-                    INNER JOIN test_question t_q ON t_q.question_id=q.id
-                    INNER JOIN test t ON t_q.test_id=t.id
-                    WHERE t.s_a_id=$author_id
-                    $limit"
-                );
-                break;
-            case 'all':
-                $test_data['a_question']=static::$db->exec(
-                    "SELECT * FROM question q
-                    $limit"
-                );
-                break;
-            default:
-                $test_data['err']=TRUE;
-                $test_data['err_txt']='Ошибка: неверный mode, свяжитесь с разработчиком';
-                break;
-        }
-        
-        if($author_id!=-1){
-            // Получение всех вопросов для выбора в меню вопросов. Только те вопросы которы создал пользователь ранее
-            
-        }
-    } */
+    }
     
 
     /**
@@ -500,7 +346,7 @@ class Tests{
      * @param int user_id
      * @return bool Истина если автор теста - это пользователь с переданным id
     */
-    public function CheckTestAuthor_id($test_id,$user_id)
+    public function CheckTestAuthor_tid($test_id,$user_id)
     {
         $res=static::$db->exec("SELECT s_a_id 
         FROM test t WHERE id=?
@@ -562,44 +408,40 @@ class Tests{
      * @param array $answ_data
      * 
      */
- /*    public function AddResult($test_link, $user_id, $answ_data)
+    public function AddResult($variant_link, $user_id, $answ_data)
     {
         $date=date('Y-m-d H:i:s');
-        //получение test id для Результата
-        $test_id=static::$db->exec("SELECT id FROM test WHERE link='$test_link'")[0]['id'];
-
+        //получение variant id для Результата
+        $variant_id=static::$db->exec("SELECT id FROM variant WHERE link=?",[$variant_link])[0]['id'];
 
         //Сохранение Результата в БД:
-        preparedQuery("INSERT INTO result 
+        static::$db->exec("INSERT INTO result 
         (
             s_a_id,
-            test_id,
-            status,
-            date,
+            variant_id,
+            \"status\",
+            \"date\",
             sum
         ) 
         VALUES(?,?,?,?,?)",
         [
-            'iiisi',
             $user_id,
-            $test_id,
+            $variant_id,
             0,
             $date,
             0
-        ]);       
-
+        ]);
 
         //получение id
         $res_id=static::$db->exec("SELECT id FROM result 
             WHERE date='$date' AND
             s_a_id=$user_id AND
-            test_id=$test_id            
+            variant_id=$variant_id            
         ")[0]['id'];
     
-
         foreach ($answ_data as $v) {
             foreach($v['answ'] as $user_answ_id){
-                preparedQuery("INSERT INTO saved_answer 
+                static::$db->exec("INSERT INTO saved_answer 
                 (
                     res_id,
                     question_id,
@@ -608,7 +450,6 @@ class Tests{
                 ) 
                 VALUES(?,?,?,?)",
                 [
-                    'iiis',
                     $res_id,
                     $v['q_id'],
                     $user_answ_id,
@@ -618,22 +459,23 @@ class Tests{
         }
 
 
-        //Перебор всех сохраненных ответов
+        //Перебор всех сохраненных ответов для подсчета результата
         $test_answers=static::$db->exec("SELECT
-        a.text as 'right_answ_txt',
-        a.price as 'price',
-        a.fine as 'fine',
-        sa.descriptor as 'user_in',
-        q.is_open as 'q_is_open',
+        a.text as right_answ_txt,
+        a.price as price,
+        a.fine as fine,
+        sa.descriptor as user_in,
+        q.is_open as q_is_open,
         t.limit
 
         FROM result r
-        INNER JOIN test t ON r.test_id=t.id
-        
-        INNER JOIN question q ON q.test_id=t.id
+        INNER JOIN variant v ON r.variant_id=v.id
+        INNER JOIN test t ON v.test_id=t.id
+        INNER JOIN variant_question v_q ON v_q.variant_id=v.id
+        INNER JOIN question q ON q.id=v_q.question_id
         INNER JOIN answer a ON a.question_id=q.id
         INNER JOIN saved_answer sa ON sa.answer_id=a.id AND sa.res_id=r.id
-        WHERE t.link='$test_link' AND r.id=$res_id
+        WHERE v.id=$variant_id AND r.id=$res_id
         ");
         
         $sum=0;
@@ -653,35 +495,38 @@ class Tests{
         }
         $status = $sum >= $test_answers[0]['limit'];//TRUE если Тест пройден
 
-        preparedQuery("UPDATE result
+        static::$db->exec("UPDATE result
             SET sum=?,
-            status=?
+            \"status\"=?
             WHERE id=$res_id",
             [
-                'ii',
                 $sum,
                 $status
             ]
         );
-    } */
+    }
     /**
-     * <p>Возвращает результаты пользователя у конкретного теста</p>
+     * <p>Возвращает результаты пользователя у конкретного варианта теста</p>
      *
-     * @param mixed $test_link
+     * @param mixed $variant_link
      * @param mixed $user_id
      * 
      * @return array
      * 
      */
-    public function GetUserTestResults($test_link,$user_id)
+    public function GetUserTestResults($variant_link,$user_id)
     {
         return static::$db->exec("SELECT
             t.*,
+            v.title as v_title,
+            v.link as v_link,
             r.date,r.status,r.sum 
             FROM result r
-            INNER JOIN test t ON t.id=r.test_id
-            WHERE t.link='$test_link' AND r.s_a_id=$user_id
-        ");
+            
+            INNER JOIN variant v ON v.id=r.variant_id
+            INNER JOIN test t ON t.id=v.test_id
+            WHERE v.link=? AND r.s_a_id=?
+        ",[$variant_link,$user_id]);
         
 
     }
@@ -691,13 +536,10 @@ class Tests{
      * Возвращает Ассоциативный массив с лучшим результатом пользователя по каждому из пройденых им тестов, который выводится
      * на странице профиля. Если такого результата нет, то выведет последнюю попытку для пройденого пользователем теста
      * </p>
-     *
      * @param int $user_id
-     * 
      * @return array
-     * 
      */
-    public function GetUserResults($user_id){
+    public function GetUserResults($user_id,$where=''){
         return static::$db->exec("SELECT 
         t.title,
         v.link,
@@ -712,43 +554,72 @@ class Tests{
             FROM result _r
             WHERE _r.s_a_id=$user_id AND _r.variant_id=v.id
             ORDER BY _r.status DESC, _r.date DESC LIMIT 1
-        )
-        "
+        )".($where!=''?"AND($where)":'')
         );
     }
 
-    
     /**
      * <p>Возвразвращает попытки пользователей, для вывода на странице со статистикой Теста по его ссылке</p>
      *
-     * @param string $test_link
-     * @param string $search=''
+     * @param string $test_id
+     * @param array $where[] - массив резульатов работы GetWhere
      * 
-     * @return array
+     * @return array 
      * 
+     * @see Tests::GetWhere
      */
-    public function GetTestStatistics_link($test_link, $where='')
+    public function GetTestStatistics_tid($test_id, $where)
     {
-        return static::$db->exec("SELECT
-            t.s_a_id as 'author_id',
+        $out['test']=static::$db->exec("SELECT
+            t.id as test_id,
+            t.s_a_id as author_id,
             t.title,
             t.description,
             t.limit,
             t.start,
-            t.end,
-            t.link,
-            s.name as 'user_name',
+            t.end
+            FROM test t
+            INNER JOIN variant v ON v.test_id=t.id
+            WHERE t.id=?",
+            [
+                $test_id
+            ]
+        )[0];
+        $out['variants']=static::$db->exec("SELECT
+            v.link as v_link,
+            v.title as v_title,
+            COUNT(v_q.question_id) as q_count
+            FROM test t
+            INNER JOIN variant v ON v.test_id=t.id
+            LEFT JOIN variant_question v_q ON v_q.variant_id=v.id
+            WHERE t.id=? 
+            ".($where['variants']!=''?'AND('.$where['variants'].')':'').
+            "GROUP BY v_q.variant_id,v.id",
+            [
+                $test_id
+            ]
+        );
+        $out['results']=static::$db->exec("SELECT
+            v.title as v_title,
+            s.name as user_name,
+            t.limit,
             r.date,
             r.status,
             r.sum
             FROM test t
-            INNER JOIN result r ON r.test_id=t.id
+            INNER JOIN variant v ON v.test_id=t.id
+            INNER JOIN result r ON r.variant_id=v.id
             INNER JOIN s_a s ON r.s_a_id=s.id
-            WHERE t.link='$test_link' ".($where!=''?"AND($where)":'')."
-        ");
+            WHERE t.id=? ".($where['results']!=''?"AND(".$where['results'].")":''),
+            [
+                $test_id
+            ]
+        );
+        return $out;
     }
+   
     /**
-     * <p>Возвращает секцию WHERE для SQL запросов</p>
+     * <p>Возвращает секцию WHERE для SQL запросов, для поиска</p>
      *
      * @param string $search - строка со словами разделеные пробелами по которым будет вестись поиск
      * @param array $fields - массив из строк-полей по которым необходима фильтрация выдачи
@@ -759,15 +630,15 @@ class Tests{
     static public function GetWhere(string $search='',array $fields=null):string
     {
         if($search!==''){
-            $words=getSearchList($search);
+            $words=CFuns::getSearchList($search);
             $where='';
             foreach ($words as $word)
-            {
+             {
                 foreach ($fields as $field) {
                     $where.="$field LIKE '%$word%' OR ";
                 }
                 
-            }
+           }
             return substr($where, 0, -3);
         }
         return '';
