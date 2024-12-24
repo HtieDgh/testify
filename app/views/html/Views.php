@@ -235,7 +235,7 @@
                             <a title="Изменить тест"  href="editor/'.$test['id'].'/"><img alt="Изменить" src="change_test.svg"></a>
                         </div>
                         <div class="test_btn">
-                            <a title="Удалить тест" class="test_del_btn" href="delete_test/TODO/"><img alt="Удалить" src="minus_test.svg"></a>
+                            <a title="Удалить тест" class="test_del_btn" href="delete/test/'.$test['id'].'/"><img alt="Удалить" src="minus_test.svg"></a>
                         </div>
                     </div>
                 </div>
@@ -830,7 +830,7 @@
                 <input type="hidden" name="variant_id" class="variant_id"  value="'.$vd['id'].'">
 
 
-                <a title="Удалить вариант теста" class="qst_btn_alt del_answ_btn" href="'.$vd['id'].'"><img alt="Удалить вариант теста" src="minus_test.svg"></a>
+                <a title="Удалить вариант теста" class="qst_btn_alt del_answ_btn" href="./../../delete/variant/'.$vd['link'].'"><img alt="Удалить вариант теста" src="minus_test.svg"></a>
             
             </div>
             ';

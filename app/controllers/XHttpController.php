@@ -36,7 +36,7 @@ class XHttpController
 
         $log_err_txt=Security::loginTest($f3,$db);
 
-        if(preg_match("/[^0-9a-z_]/",$params['variant_link']))
+        if(preg_match("/[^0-9a-z]/",$params['variant_link']))
         {
             
             $return_out['err']=TRUE;
@@ -68,7 +68,7 @@ class XHttpController
                 
                 Security::updateCookie('variant_link',$params['variant_link'],"/",$_SERVER['HTTP_HOST'],TRUE);
                 //Удаление файлов если они существуют
-                $upl->DeleteTest($variant_link);
+                $upl->DeleteVariant($variant_link);
             }
         }else if( $t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id')) )
         {
@@ -76,7 +76,7 @@ class XHttpController
             $variant_link=$params['variant_link'];
             Security::updateCookie('variant_link',$params['variant_link'],"/",$_SERVER['HTTP_HOST'],TRUE);
             //Удаление файлов если они существуют
-            $upl->DeleteTest($variant_link);
+            $upl->DeleteVariant($variant_link);
         }else {
             $return_out['err']=TRUE;
             $return_out['err_txt']='Пользователь не авторизован для изменения! Пройдите авторизацию.';
@@ -166,9 +166,55 @@ class XHttpController
         exit;       
     }
     /**
-     * <p>Удаление теста</p>
+     * <p>Удаление теста со всеми его вариантами/вопросами/ответами/фалами</p>
     */
-  /*   public function deleteTest($f3,$params=NULL) {
+    public function deleteTest($f3,$params=NULL) {
+        global $db;
+        $return_out['err']=TRUE;
+        $return_out['err_txt']='Ошибка передачи индентификатора теста, попробуйте снова';
+
+        $log_err_txt=Security::loginTest($f3,$db);
+        if( $f3->get('user.access')<=1 )
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt']=$log_err_txt;
+            echo json_encode($return_out);
+            exit;
+        }
+        if ( preg_match("/[^0-9]/",$params['test_id']) )
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt']='Передан невернный идентификатор теста';
+            echo json_encode($return_out);
+            exit;
+        }
+        if($params['test_id']!=='0'){
+            $t=new Tests($db);
+            $upl=new Uploads($f3->get('user_test_data_path'),$f3->get('user.login'));
+
+            if( !$t->CheckTestAuthor_id($params['test_id'],$f3->get('user.id')) )
+            {
+                $return_out['err']=TRUE;
+                $return_out['err_txt']='Пользователь не авторизован для данной операции удаления';
+                echo json_encode($return_out);
+                exit;
+            }
+            $variants=$t->GetAllTestVariants_tid($params['test_id']);
+            foreach ($variants as $v) {
+                //Удаление файлов всех вариантов теста
+                $upl->DeleteVariant($v['link']);   
+            }
+             //Удаление из БД
+             $t->DeleteTest($params['test_id']);
+             $return_out['err']=FALSE;
+             $return_out['err_txt']='';
+        }
+        echo json_encode($return_out);
+    }
+    /**
+     * <p>Удаление варианта теста со всеми его вопросами/ответами/фалами</p>
+    */
+    public function deleteVariant($f3,$params=NULL) {
         global $db;
         $return_out['err']=FALSE;
         $return_out['err_txt']='';
@@ -177,29 +223,37 @@ class XHttpController
         if( $f3->get('user.access')<=1 )
         {
             $return_out['err']=TRUE;
-            $return_out['err_txt'].=$log_err_txt;
+            $return_out['err_txt']=$log_err_txt;
             echo json_encode($return_out);
             exit;
         }
-        if ( !preg_match("/[^0-9]/",$params['test_id']) )
+        if ( preg_match("/[^0-9a-z]/",$params['variant_link']) )
         {
             $return_out['err']=TRUE;
-            $return_out['err_txt'].='Ошибка при передаче данных теста. Попробуйте снова.';
+            $return_out['err_txt']='Передан невернный идентификатор варианта';
             echo json_encode($return_out);
             exit;
         }
         if($params['variant_link']!=='0'){
+            $t=new Tests($db);
+            $upl=new Uploads($f3->get('user_test_data_path'),$f3->get('user.login'));
+
             if( !$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id')) )
             {
                 $return_out['err']=TRUE;
-                $return_out['err_txt'].='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию или закройте данное окно и попробуйте создать свой тест.';
+                $return_out['err_txt']='Пользователь не авторизован для данной операции удаления';
                 echo json_encode($return_out);
                 exit;
             }
+
+            //Удаление файлов варианта теста
+             $upl->DeleteVariant($params['variant_link']);   
+            
+            //Удаление из БД
+             $t->DeleteVariant($params['variant_link']);
         }
-
-    } */
-
+        echo json_encode($return_out);
+    }
     /**
      * <p>Сохранение изменений вопросов</p>
     */

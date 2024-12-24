@@ -488,10 +488,26 @@ class Tests{
     {
         $res=static::$db->exec("SELECT s_a_id 
         FROM test t INNER JOIN variant v ON t.id=v.test_id 
-        WHERE v.link='$variant_link'
-        ");
+        WHERE v.link=?
+        ",[$variant_link]);
         return count($res)>0 && $user_id==$res[0]['s_a_id'];
     }
+
+
+    /**
+     * <p>Проверяет является ли автором теста по id пользователь с переданым uid</p>
+     * @param int test_id
+     * @param int user_id
+     * @return bool Истина если автор теста - это пользователь с переданным id
+    */
+    public function CheckTestAuthor_id($test_id,$user_id)
+    {
+        $res=static::$db->exec("SELECT s_a_id 
+        FROM test t WHERE id=?
+        ",[$test_id]);
+        return count($res)>0 && $user_id==$res[0]['s_a_id'];
+    }
+
 
     /**
      * <p>Возвращает Логин автора для конструирования ссылок на файлы теста</p>
@@ -507,17 +523,36 @@ class Tests{
     }
 
     /**
-     * <p>Удаление теста из БД</p>
+     * <p>Удаление теста из БД по его id. Удаляет также и вопросы/ответы всех вариантов этого теста</p>
      * @param int test_link
     */
-    public function DeleteTest($test_link,)
+    public function DeleteTest($test_id)
     {
-        static::$db->exec("DELETE FROM test WHERE link=?",
-        array(
-            $test_link
-        ));
+        static::$db->exec("DELETE FROM question q WHERE q.id IN(
+            SELECT question_id FROM variant_question v_q 
+            INNER JOIN variant v ON v.id=v_q.variant_id
+            WHERE v.test_id=?
+        )",
+        [
+            $test_id
+        ]);
+        static::$db->exec("DELETE FROM test WHERE id=?",
+        [
+            $test_id
+        ]);
     }
-
+    /**
+     * <p>Удаление варианта теста из БД по его link. Не удаляет вопросы</p>
+     * @param int test_link
+    */
+    public function DeleteVariant($variant_link)
+    {
+        static::$db->exec("DELETE FROM variant
+            WHERE link=?",
+        [
+            $variant_link
+        ]);
+    }
 
     /**
      * <p>Формирует результат сдачи теста</p>

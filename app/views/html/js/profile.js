@@ -7,10 +7,11 @@ $(document).ready(function(){
             $.get(this.href,
             {},
             (data)=>{
+                console.log(data);
                 let msg=JSON.parse(data);
-                console.log(msg);
                 if(msg['err']==false){ 
                     test_wrap.remove();
+                    alert('Тест удален!');
                 }else{
                     alert(msg['err_txt']);
                 }

@@ -78,11 +78,12 @@ class Uploads{
 		return ['link'=>$this->file_dir.$variant_link.'/variant_'.date('is').'.zip',
 		'folder'=>$this->file_dir.$variant_link.'/'];
 	}
+
 	/**
-	 * <p>Удаляет файлы варианта из файловой системы по его variant_link</p>
+	 * <p>Удаляет файлы варианта из файловой системы по его variant_link или test_id</p>
 	 * @param string link
 	*/
-	public function DeleteTest($variant_link)
+	public function DeleteVariant($variant_link)
 	{
 		$this->_removeDir($this->file_dir.$variant_link.'/');
 	}
