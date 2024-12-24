@@ -1,4 +1,5 @@
 $(document).ready(function(){
+    var t_id=$('.add_elem_btn').attr('href');
 
     function getTestData() {
         if($('#test_description').val().trim()!=''||
@@ -10,8 +11,7 @@ $(document).ready(function(){
                 limit:$('#limit').val(),
                 test_start:$('#start').val(),
                 test_end:$('#end').val(),
-                test_id:$('#test_id').val(),
-                test_cu:$('#test_cu').val(),
+                test_id:$('#test_id').val()
             };
         }else{
             throw new Error('Заполните Название и Описание теста, прежде чем завершать редактирование');
@@ -19,93 +19,91 @@ $(document).ready(function(){
         
         return tst_data;
     }
-
-    function newEvents(){
-        //===== Удаление вопроса из списка =====
-        $('.del_answ_btn').off('click').click(function(e){
-            e.preventDefault();
-            
-            let q_id=$(this).attr('href');
-            let p=$(this).parent().parent();
-            //Плавное исчезновение
-            $(this).parent().animate({opacity:0},300,function(){
-                $(this).remove();
-                    //Обновление номеров у span
-                p.find('.answ_number').each((k,v)=>{
-                    $(v).html(k+1);
-                });
-                //Обновление кол-ва ответов для отображения номера
-                $('#'+q_id+'_answ_count').val($('#'+q_id+'_answ_count').val()-1);
-                //Удалить последний вар ответа нельзя
-                if($('#'+q_id+'_answ_count').val()==1){
-                    $('#'+q_id+'_q .del_answ_btn').hide();
-                }
+    function getVariantData(){
+        let variant_data=[];
+           
+        $('.'+t_id+'_test_var').each((k,v)=>{
+            let t=$(v).find('.title').val();
+            if(t==''){
+                throw new Error('Заполните все названия Вариантов, прежде чем переходить на след шаг');
+            }
+            variant_data.push({
+                link: $(v).find('.chosen_variant').val(),
+                title: t,
+                is_active:$(v).find('.chosen_variant:checked').length>0 ? 1:0.
             });
         });
-    
-        //==== Добавление варианта ответа в вопрос ====
-        // Одиночный клик - Новый вопрос
-        $('.add_answ_btn').off('click').click(function(e){
+        return variant_data;
+    }
+
+        //==== Добавление варианта ====
+        // Одиночный клик - Новый вариант
+        $('.add_elem_btn').off('click').click(function(e){
             e.preventDefault();
-            let q_id=$(this).attr('href');
-            let answ_count=Number($('#'+q_id+'_answ_count').val());
+            let v_count=Number($('v_countjs').val());
            
-            answ_count++;
+            v_count++;
             
             $(this).before(
-                `<div class="`+q_id+`_qst_answ flex_fs_r_ac transparent">
-    
-                    <span class="fs14_txt answ_number mr_r_10">`+answ_count+`</span>
-                    <textarea rows="1" class=" mr_r_10" name="`+q_id+`_`+(answ_count-1)+`_qst_answ" placeholder="Текст ответа" value="" required></textarea>
-                    <input type="number"  name="price" min="-1000" max="1000" value="0">
-                    <input type="number" class="fine_input" name="fine" min="-1000" max="1000" value="0">
-    
-                    <a title="Удалить вариант ответа" class="qst_btn_alt del_answ_btn" href="`+q_id+`"><img alt="Удалить вариант ответа" src="minus_test.svg"></a>
+
+                `<div class="`+t_id+`_test_var flex_fs_r_ac">
+                              
+                <div class="flex_c_r_ac">
+                    <input type="radio" class="chosen_variant" name="variant" value="0">
+                    <span class="fs14_txt answ_number mr_r_10">`+v_count+`</span>
+                </div>
+                    
+                    
+                    <textarea rows="1" class="title mr_r_10" name="0_id_var" placeholder="Название Варианта" value="" required></textarea>
+                    
+                    <a title="Удалить вариант теста" class="qst_btn_alt del_answ_btn" href=""><img alt="Удалить вариант теста" src="minus_test.svg"></a>
                 
-                </div>`
-            );
-            $('#'+q_id+'_answ_count').val(answ_count);
-            //Плавное появление варианта ответа 
-            $('.'+q_id+'_qst_answ').animate({opacity:1},300);
-            //Добавление кнопки Удалить вар ответа если до этого она была скрыта
-            $('#'+q_id+'_q .del_answ_btn').show();
-            newEvents();
+                </div>
+                `);
+            $('#'+t_id+'_v_count').val(v_count);
+            //Плавное появление варианта 
+            $('.'+t_id+'_test_var').animate({opacity:1},300);
+
         });
 
-    $('#confirm_edit_btn').click(function(e){
-        e.preventDefault();
-        let fd=new FormData();
-        $(this).html('Подождите...')
-        try {
-            //Включение test_data в форму отправки
-            fd.append('test_data',JSON.stringify(getTestData()));
-            $.ajax({
-                url: '../../edit/test',
-                data: fd,
-                cache: false,
-                contentType: false,
-                processData: false,
-                method: 'POST',
-                type: 'POST', // For jQuery < 1.9
-                success: function(msg){
-                    console.log(msg);
-                    let m=JSON.parse(msg);
-                    console.log(m);
-                    if(!m.err){
-                        location.href='./';
-                    }else{
-                        $('#err_wrap').modal();
-                        $('#exept_txt').html(m.err_txt);
-                    }
-    
-                }
-            });
-        } catch (ex) {
-            $('#err_wrap').modal();
-            $('#exept_txt').html(ex.message);
-            $(this).html('Следующий шаг');
-        }
 
-       
-    });
+        $('#confirm_edit_btn').click(function(e){
+            e.preventDefault();
+            let fd=new FormData();
+            $(this).html('Подождите...')
+            try {
+                //Включение test_data в форму отправки
+                fd.append('test_data',JSON.stringify(getTestData()));
+                fd.append('variant_data',JSON.stringify(getVariantData()));
+                console.log(fd.get('test_data'));
+                console.log(fd.get('variant_data'));
+                $.ajax({
+                    url: '../../edit/test/'+$('.chosen_variant:checked').val(),
+                    data: fd,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    method: 'POST',
+                    type: 'POST', // For jQuery < 1.9
+                    success: function(msg){
+                        console.log(msg);
+                        let m=JSON.parse(msg);
+                        console.log(m);
+                        if(!m.err){
+                            location.href='../../edit/questions/'+m.variant_link;
+                        }else{
+                            $('#err_wrap').modal();
+                            $('#exept_txt').html(m.err_txt);
+                        }
+        
+                    }
+                });
+            } catch (ex) {
+                $('#err_wrap').modal();
+                $('#exept_txt').html(ex.message);
+                $(this).html('Следующий шаг');
+            }
+
+        }); 
+    
 });

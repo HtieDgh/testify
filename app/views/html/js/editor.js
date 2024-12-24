@@ -8,22 +8,17 @@ $(document).ready(function(){
         a.click();
         }
     // Возвращает текущую структуру данных теста
-    function getTestData() {
+    function getQuestionData() {
         let qst_data=[];
         //Формирование списка существующих вопросов и ответов на них
-        let q_id=0;
-        while($('#'+q_id+'_q').length==0){
-            q_id++;
-        } 
-        do {
-            let cur_qst=$('#'+q_id+'_q');
+        $('.questionjs').each((k,elem)=>{
             
             //Список имен файлов и их типов жля последуюбщей обработки на сервере
-            let files_input=cur_qst.find('#'+q_id+'_files');
+            let files_input=$(elem).find('.fileinjs');
             
             let fls_list=[];
             for (let i = 0; i < files_input[0].files.length; i++) {
-                
+
                 fls_list.push({
                     name: files_input[0].files[i].name,
                     mime: files_input[0].files[i].type
@@ -31,10 +26,11 @@ $(document).ready(function(){
             }
             //Список ответов
             let answ_list=[]
-            cur_qst.find('.'+q_id+'_qst_answ').each(function(k,v) {
-                if($('textarea[name='+q_id+'_'+k+'_qst_answ]').val()!=''){
+            $(elem).find('.qstanswjs').each(function(k,v) {
+                if($(v).find('textarea').val()!=''){
                     answ_list.push({
-                        text: $('textarea[name='+q_id+'_'+k+'_qst_answ]').val(),
+                        id:$(v).find('.answidjs').val(),
+                        text: $(v).find('textarea').val(),
                         price: $(v).find('input[name=price]').val(),
                         fine: $(v).find('input[name=fine]').val()
                     });
@@ -42,12 +38,13 @@ $(document).ready(function(){
                     throw new Error('Заполните все поля ответов, прежде чем завершать редактирование');
                 }
             });
-            if(cur_qst.find('.qst_title').val().trim()!=''){
+            if($(elem).find('.qst_title').val().trim()!=''){
                 qst_data.push({
-                    title: cur_qst.find('.qst_title').val(),
-                    text: cur_qst.find('.qst_txt').val(),
-                    type: cur_qst.find('input[name=type]:checked').val(),
-                    is_vid_hidden: cur_qst.find('#'+q_id+'_is_vid_hidden').prop('checked'),
+                    id:$(elem).find('.qidjs').val(),
+                    title: $(elem).find('.qst_title').val(),
+                    text: $(elem).find('.qst_txt').val(),
+                    is_open: $(elem).find('input[name=type]:checked').val(),
+                    is_vid_hidden: $(elem).find('input[name=is_vid_hidden]').prop('checked'),
                     file_names: fls_list,
                     answs: answ_list
                 });
@@ -55,28 +52,9 @@ $(document).ready(function(){
                 throw new Error('Заполните Заголовки вопросов, прежде чем завершать редактирование');
             }
             
-            
-            q_id++;
-        } while ($('#'+q_id+'_q').length>0);
-        
-        if($('#test_description').val().trim()!=''||
-        $('#test_title').val()!=''){
-            //Структура данных теста
-            console.log($('#test_title').val().replace(/"/g,'\\\\\"'));
-            var tst_data={
-                link:$('#test_link').val(),
-                title:$('#test_title').val().replace(/"/g,'\\\\\"'),
-                descript:$('#test_description').val().replace(/"/g,'\\\\\"'),
-                limit:$('#limit').val(),
-                test_start:$('#start').val(),
-                test_end:$('#end').val(),
-                qsts: qst_data
-            };
-        }else{
-            throw new Error('Заполните Название и Описание теста, прежде чем завершать редактирование');
-        }
-        
-        return tst_data;
+        });
+                
+        return qst_data;
     }
        
     /*===========Добавление событий на кнопки после их рендера на странице=================*/
@@ -99,7 +77,7 @@ $(document).ready(function(){
         });
     
         //==== Добавление варианта ответа в вопрос ====
-        // Одиночный клик - Новый вопрос
+
         $('.add_answ_btn').off('click').click(function(e){
             e.preventDefault();
             let q_id=$(this).attr('href');
@@ -108,8 +86,9 @@ $(document).ready(function(){
             answ_count++;
             
             $(this).before(
-                `<div class="`+q_id+`_qst_answ flex_fs_r_ac transparent">
-    
+                `<div class="qstanswjs flex_fs_r_ac transparent">
+                    <input type="hidden" name="answidjs" class="answidjs" value="0">
+                    
                     <span class="fs14_txt answ_number mr_r_10">`+answ_count+`</span>
                     <textarea rows="1" class=" mr_r_10" name="`+q_id+`_`+(answ_count-1)+`_qst_answ" placeholder="Текст ответа" value="" required></textarea>
                     <input type="number"  name="price" min="-1000" max="1000" value="0">
@@ -120,17 +99,16 @@ $(document).ready(function(){
                 </div>`
             );
             $('#'+q_id+'_answ_count').val(answ_count);
-            //Плавное появление варианта ответа 
-            $('.'+q_id+'_qst_answ').animate({opacity:1},300);
+            //Плавное появление ответа 
+            $('.qstanswjs').animate({opacity:1},300);
             //Добавление кнопки Удалить вар ответа если до этого она была скрыта
             $('#'+q_id+'_q .del_answ_btn').show();
             newEvents();
         });
-        // Двойтой клик - Открыть список существующих вопросов в БД 
-        // TODO
 
 
-        //=== Удаление варианта ответа ===
+
+        //=== Удаление ответа ===
         $('.del_answ_btn').off('click').click(function(e){
             e.preventDefault();
             
@@ -156,12 +134,13 @@ $(document).ready(function(){
         $('.form-inner input[name=type]').off("change").change(function(){
             let q_id = $(this).attr('id').substring(0,$(this).attr('id').indexOf('_'));
             
-            $('.'+q_id+'_qst_answ').remove();
+            $('#'+q_id+'_q .qstanswjs').remove();
             $('#'+q_id+'_answ_count').val('1');
             if (this.value == '1') {
                 $('#'+q_id+'_answ_list').after(`
-                <div class="`+q_id+`_qst_answ flex_fs_r_ac transparent">
-                    
+                <div class="qstanswjs flex_fs_r_ac transparent">
+                 <input type="hidden" name="answidjs" class="answidjs" value="0">    
+
                     <textarea rows="1" class=" mr_r_10" name="`+q_id+`_0_qst_answ" placeholder="Текст ответа" value="" required></textarea>
                     
                     <input type="number" name="price" min="-1000" max="1000" value="0">
@@ -173,8 +152,9 @@ $(document).ready(function(){
     
             }else{
                 $('#'+q_id+'_answ_list').after(`
-                <div class="`+q_id+`_qst_answ flex_fs_r_ac transparent">
-                                        
+                <div class="qstanswjs flex_fs_r_ac transparent">
+                    <input type="hidden" name="answidjs" class="answidjs" value="0">
+
                     <span class="fs14_txt answ_number mr_r_10">1</span>
                     <textarea rows="1" class=" mr_r_10" name="`+q_id+`_0_qst_answ" placeholder="Текст ответа" value="" required></textarea>
                     
@@ -190,15 +170,16 @@ $(document).ready(function(){
             $('.transparent').animate({opacity:1},300);
         });
     }
-    //==== Добавление вопроса в список ====
+    //==== Добавление вопроса в список ==== 
+    // Одиночный клик - Новый вопрос
     $('#add_qst_btn').click(function(e){
         e.preventDefault();
         $(this).before(
-            `<div id="`+all_qst_count+`_q" class="note transparent">
+            `<div id="`+all_qst_count+`_q" class="questionjs note transparent">
             <div class="flex_sb_r">
                 <form class="decor" method="post" action="new_test/">
                     <div class="form-inner">
-    
+                        <input type="hidden" name="qidjs" class="qidjs" value="0">
                         <input type="text" class="fs12_txt qst_title" name="qst_title" placeholder="Заголовок" value="" required>
                         <div class="flex_sb_r flex_wr">
                             <div class="qst_type flex_sb_r_ac">
@@ -217,7 +198,7 @@ $(document).ready(function(){
     
                         <textarea name="note_txt" class="edit_txt qst_txt" placeholder="Текст вопроса" rows="4" required></textarea>
                         <div class="flex_sb_r_ac flex_wr">
-                            <input class="file_in UserIn" id="`+all_qst_count+`_files" accept="image/*,video/*,audio/*" name="user_files[]" type="file" multiple>
+                            <input class="fileinjs UserIn" id="`+all_qst_count+`_files" accept="image/*,video/*,audio/*" name="user_files[]" type="file" multiple>
                             <div class="flex_fs_r_ac">
                                 <input class="mr_r_10" type="checkbox" name="is_vid_hidden" id="`+all_qst_count+`_is_vid_hidden">
                                 <label for="`+all_qst_count+`_is_vid_hidden">Скрыть видео?</label>
@@ -228,7 +209,7 @@ $(document).ready(function(){
                             <p class="ac_txt">Варианты ответов:</p>
                             <input id="`+all_qst_count+`_answ_count" type="hidden" name="answ_count" value="1">
                             <hr id="`+all_qst_count+`_answ_list">
-                            <div class="`+all_qst_count+`_qst_answ flex_fs_r_ac">
+                            <div class="qstanswjs flex_fs_r_ac">
                             
                                 <span class="fs14_txt answ_number mr_r_10">1</span>
                                 <textarea rows="1" class=" mr_r_10" name="`+all_qst_count+`_0_qst_answ" placeholder="Текст ответа" value="" required></textarea>
@@ -266,8 +247,12 @@ $(document).ready(function(){
         
         newEvents();
     });
+    // Двойтой клик - Открыть список существующих вопросов в БД 
+    // TODO
+
+
     //==== Отображение текста ошибки от сервера если она есть ====
-    if($('#err_wrap').length){
+    if($('#exept_txt').html()!=''){
         $('#err_wrap').modal();
     }
     
@@ -278,7 +263,7 @@ $(document).ready(function(){
         e.preventDefault();
         //Подсчет кол-ва загружаемых на сервер файлов
         var up_file_count=0;
-        $('.file_in').each(function(){
+        $('.fileinjs').each(function(){
                         
             for (let i = 0; i < $(this).prop('files').length; i++) {
                 up_file_count++;
@@ -294,12 +279,12 @@ $(document).ready(function(){
                     $('#confirm_edit_btn').html('Ошибка');
                     console.log(msg);
                     let m=JSON.parse(msg);
-                    console.log(m);
                     if(!m.err){
                         $('#ex1').modal();
                         $('#a_test_link').attr('href',m.link).html(m.link);
                         downloadFile(m.test_file_link);
                         $('#confirm_edit_btn').html('Завершить редактирование');
+                        $('#confirm_edit_btn').attr('href',"./../../");
                     }else{
                         throw new Error(m.err_txt);
                     }
@@ -307,18 +292,21 @@ $(document).ready(function(){
                 }
                 function fn_onCompleteFilesLoad() {
                     let fd2=new FormData();
-                    //Включение test_data в форму отправки
-                   fd2.append('test_data',JSON.stringify(getTestData()));
+                    //Включение question_data в форму отправки
+                   fd2.append('question_data',JSON.stringify(getQuestionData()));
                    //Отправка запроса
                    $.ajax({
-                       url: '../../new_test',
+                       url: '../../edit/questions/'+$('#variant_link').val(),
                        data: fd2,
                        cache: false,
                        contentType: false,
                        processData: false,
                        method: 'POST',
                        type: 'POST', // For jQuery < 1.9
-                       success: fn_serverResponse
+                       success: fn_serverResponse,
+                       error: ()=>{
+                        $('#confirm_edit_btn').html('Следующий шаг');
+                       }
                    });
                    
                 }
@@ -328,11 +316,9 @@ $(document).ready(function(){
                     let fd=new FormData();
             
                     //Поготовка данных перед отправкой файлов теста 
-                    fd.append('test_link',$('#test_link').val());
-                    fd.append('test_title',$('#test_title').val());
                     fd.set('file_count',up_file_count);
                     
-                    $('.file_in').each(function(){
+                    $('.fileinjs').each(function(){
                         
                         for (let i = 0; i < $(this).prop('files').length; i++) {
                             //Размер файла боьше 50 Мб - ошибка
@@ -344,7 +330,7 @@ $(document).ready(function(){
                             fd.set('file',this.files[i]);
                             
                             $.ajax({
-                                url: '../../send_test_file',
+                                url: '../../send/test/file/'+$('#variant_link').val(),
                                 data: fd,
                                 cache: false,
                                 contentType: false,
@@ -354,11 +340,17 @@ $(document).ready(function(){
                                 success: function(msg){
         
                                     console.log(msg);
-                                    if(--up_file_count == 0) {
+                                    let m=JSON.parse(msg);
+                                    if(m.err){
+                                        $('#err_wrap').modal();
+                                        $('#exept_txt').html(m.err_txt);
+                                    }else if(--up_file_count == 0) {
                                         //Попытка отследить отправку последнего файла
                                         fn_onCompleteFilesLoad();
                                     }
-                                    console.log(up_file_count);
+                                },
+                                error: ()=>{
+                                    $('#confirm_edit_btn').html('Следующий шаг');
                                 }
                             });
                             
@@ -376,9 +368,9 @@ $(document).ready(function(){
                
             } catch (ex) {
                 
-                $('#ex2').modal();
+                $('#err_wrap').modal();
                 $('#exept_txt').html(ex.message);
-                $('#confirm_edit_btn').html(`Завершить редактирование`);
+                $('#confirm_edit_btn').html(`Следующий шаг`);
             }
     
         }

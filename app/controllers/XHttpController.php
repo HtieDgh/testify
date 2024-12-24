@@ -26,7 +26,7 @@ class XHttpController
         echo json_encode($return_out);
     }
     /**
-     * <p>Регистрация новго пользователя</p>
+     * <p>Сохранение файлов теста</p>
     */
     public function saveTestFiles($f3,$params=NULL) {
         global $db;
@@ -36,72 +36,64 @@ class XHttpController
 
         $log_err_txt=Security::loginTest($f3,$db);
 
-        if(!isset($_POST['test_link']) || !isset($_POST['test_title']) || preg_match("/[^0-9a-z_]/",$_POST['test_link']))
+        if(preg_match("/[^0-9a-z_]/",$params['variant_link']))
         {
-            //Ошибка когда Важные параметры не передаы
+            
             $return_out['err']=TRUE;
-            $return_out['err_txt']='При создании теста параметры POST переданы не были: повторите попытку';
+            $return_out['err_txt']='При создании теста параметры неверно передана ссылка на вариант, повторите снова';
             echo json_encode($return_out);
-            return;
+            exit;
         }
 
-        if($f3->get('user.access')>1)
+        if($f3->get('user.access')<=1)
         {
-        
-            $_POST=sanitizeString($_POST);
-            
-            $upl=new Uploads($f3->get('user'));
-            $t=new Tests($db);
-
-            if($_POST['test_link']=='')
-            {
-                //Новый тест
-                //Генерация test_link для будущего теста который будет создан в new_test
-                $test_link=md5( $_POST['test_title'].$f3->get('user.name') );
-                
-            }else{
-                
-                //Кеширование ссылки теста для загрузки
-                if(isset($_COOKIE['test_link']))
-                {
-                    $test_link=$_POST['test_link'];
-                    //Файл для изменяемого теста уже был отправлен
-                    if($_POST['test_link'] != $_COOKIE['test_link'])
-                    {
-                                                        
-                        //Пользователь изменяет другой тест
-                       
-                        $user->updateCookie('test_link',$_POST['test_link'],"/",$_SERVER['HTTP_HOST'],TRUE);
-                        //Удаление файлов если они существуют
-                        $upl->DeleteTest($test_link);
-                    }
-                }else if( $t->CheckTestAuthor_link($f3->get('user.id'),$_POST['test_link']) )
-                {
-                    //Изменение существующего
-                    $test_link=$_POST['test_link'];
-                    $user->updateCookie('test_link',$_POST['test_link'],"/",$_SERVER['HTTP_HOST'],TRUE);
-                    //Удаление файлов если они существуют
-                    $upl->DeleteTest($test_link);
-                }else {
-                    $return_out['err']=TRUE;
-                    $return_out['err_txt']='Пользователь не авторизован для изменения! Пройдите авторизацию.';
-                }
-            }
-            
-            foreach ($_FILES as $v)
-            {
-                $err=$upl->UploadFile($v,$test_link);
-                if($err!=='')
-                {
-                    $return_out['err']=TRUE;
-                    $return_out['err_txt'].=$err;
-                }
-            }
-            
-        }else{
             $return_out['err']=TRUE;
             $return_out['err_txt']='Пользователь не авторизован! Пройдите авторизацию.';
+            echo json_encode($return_out);
+            exit;
         }
+        
+        $_POST=CFuns::sanitizeString($_POST);
+        $t=new Tests($db);
+        $upl=new Uploads($f3->get('user_test_data_path'),$f3->get('user.login'));
+  
+        //Кеширование ссылки варианта для загрузки
+        if(isset($_COOKIE['variant_link']))
+        {
+            $variant_link=$params['variant_link'];
+            //Файл для изменяемого варианта уже был отправлен
+            if($params['variant_link'] != $_COOKIE['variant_link'])
+            {                                  
+                //Возможна ситуация когда Пользователь изменяет другой вариант
+                
+                Security::updateCookie('variant_link',$params['variant_link'],"/",$_SERVER['HTTP_HOST'],TRUE);
+                //Удаление файлов если они существуют
+                $upl->DeleteTest($variant_link);
+            }
+        }else if( $t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id')) )
+        {
+            //Изменение существующего
+            $variant_link=$params['variant_link'];
+            Security::updateCookie('variant_link',$params['variant_link'],"/",$_SERVER['HTTP_HOST'],TRUE);
+            //Удаление файлов если они существуют
+            $upl->DeleteTest($variant_link);
+        }else {
+            $return_out['err']=TRUE;
+            $return_out['err_txt']='Пользователь не авторизован для изменения! Пройдите авторизацию.';
+            echo json_encode($return_out);
+            exit;
+        }
+        
+        foreach ($_FILES as $v)
+        {
+            $err=$upl->UploadFile($v,$variant_link);
+            if($err!=='')
+            {
+                $return_out['err']=TRUE;
+                $return_out['err_txt'].=$err;
+            }
+        }
+            
         echo json_encode($return_out);
     }
     /**
@@ -120,29 +112,30 @@ class XHttpController
             echo json_encode($return_out);
             exit;
         }
-        if (!isset($_POST['test_data']))
+        if (!isset($_POST['test_data']) || !isset($_POST['variant_data']))
         {
             $return_out['err']=TRUE;
-            $return_out['err_txt'].='Ошибка при передаче данных теста. Попробуйте снова.';
+            $return_out['err_txt'].='Ошибка при передаче данных теста и вариантов. Попробуйте снова.';
             echo json_encode($return_out);
             exit;
         }
-        if($params['variant_link']!=='0'){
-            if( !$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id')) )
-            {
-                $return_out['err']=TRUE;
-                $return_out['err_txt'].='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию или закройте данное окно и попробуйте создать свой тест.';
-                echo json_encode($return_out);
-                exit;
-            }
+        $t=new Tests($db);
+        if($params['variant_link']!=='0' && !$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id'))){
+            
+            $return_out['err']=TRUE;
+            $return_out['err_txt'].='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию или закройте данное окно и попробуйте создать свой тест.';
+            echo json_encode($return_out);
+            exit;
         }
         
         $_POST=CFuns::sanitizeString($_POST);
         $json_str_test=htmlspecialchars_decode(htmlspecialchars_decode($_POST['test_data']));
-        
-        $test_data=json_decode($json_str_test,TRUE);
+        $json_str_var=htmlspecialchars_decode(htmlspecialchars_decode($_POST['variant_data']));
 
-        if($test_data===null)
+        $test_data=json_decode($json_str_test,TRUE);
+        $variant_data=json_decode($json_str_var,TRUE);
+
+        if($test_data===null||$variant_data===null)
         {
             $return_out['err']=TRUE;
             $return_out['err_txt'].='Ошибка парсинга файла JSON: Смените кодировку на UTF8.';
@@ -150,30 +143,32 @@ class XHttpController
             exit;
         }
         //Ошибки обработаны, выполенение запроса к БД:
-        $t=new Tests($db);
-            
-        switch ($test_data['test_cu']) {
-            case 'new':
-                //Создание нового теста
-                $t->createTest($test_data,$f3->get('user.id'));
-                break;
-            case 'old':
-                //Изменение существующего
-                $t->updateTest($test_data);
-                break;
-            default:
-                $return_out['err']=TRUE;
-                $return_out['err_txt'].='Ошибка при сохранении теста, орбатитесь к администратору';
-                echo json_encode($return_out);
-                break;
+
+        if(preg_match("/[^0-9]/",$test_data['test_id'])){
+            $return_out['err']=TRUE;
+            $return_out['err_txt'].='Неверно передан индентификатор. Попробуйте снова.';
+            echo json_encode($return_out);
+            exit;
         }
+
+        if($test_data['test_id']=='0') {
+            //Создание нового теста
+            $newTestId=$t->CreateTest($test_data,$f3->get('user.id'));
+            $return_out['variant_link']=$t->CreateVariants($newTestId,$variant_data);
+
+        }else{
+            //Изменение существующего
+            $t->UpdateTest($test_data);
+            $return_out['variant_link']=$t->UpdateVariants($variant_data,$test_data['test_id']);
+        }
+                
         echo json_encode($return_out);
         exit;       
     }
     /**
      * <p>Удаление теста</p>
     */
-    public function deleteTest($f3,$params=NULL) {
+  /*   public function deleteTest($f3,$params=NULL) {
         global $db;
         $return_out['err']=FALSE;
         $return_out['err_txt']='';
@@ -203,37 +198,99 @@ class XHttpController
             }
         }
 
-    }
+    } */
 
-    function makeJSONtoFolderTest() {
-        
-                
-        $t->DeleteTest($test_data['link']);
+    /**
+     * <p>Сохранение изменений вопросов</p>
+    */
+    public function editQuestions($f3,$params=null){
+        global $db;
+        $return_out['err']=FALSE;
+        $return_out['err_txt']='';
 
-        $test_struct=$t->AddTest($test_data,$f3->get('user.id'),$f3->get('user.name'));
-        $return_out['link']=SITE_DOMAIN.'test/'.$test_struct['link'];
-    //Сохранение загруженных файлов
-        
-        $upl=new U($user->user_data);
-        
-    //Вставка json_str в папку с тестом
-        if( $upl->UploadJSONTestData($json_str_test, $test_struct['link']) !== FALSE )
+        $log_err_txt=Security::loginTest($f3,$db);
+        if( $f3->get('user.access')<=1 )
         {
-        //Генерация архива и ссылки на него
-            $test_path=$upl->file_dir.$test_struct['link'].'/';
-        //Ссылка на архив теста для загрузки на стороне пользователя
-            $link = $test_path.'test_'.date('is').'.zip';
-
-            Zip::zipDir($test_path, $link);
-
-            $return_out['test_file_link']=SITE_DOMAIN.$link;
+            $return_out['err']=TRUE;
+            $return_out['err_txt']=$log_err_txt;
+            echo json_encode($return_out);
+            exit;
+        }
+        if(preg_match("/[^0-9a-z_]/",$params['variant_link']))
+        {
             
+            $return_out['err']=TRUE;
+            $return_out['err_txt']='При создании теста параметры неверно передана ссылка на вариант, повторите снова';
+            echo json_encode($return_out);
+            exit;
+        }
+
+        if (!isset($_POST['question_data']))
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt']='Ошибка при передаче данных вопросов. Попробуйте снова.';
+            echo json_encode($return_out);
+            exit;
+        }
+        $t=new Tests($db);
+        if(!$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id'))){
+            
+            $return_out['err']=TRUE;
+            $return_out['err_txt']='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию.';
+            echo json_encode($return_out);
+            exit;
+        }
+        $_POST=CFuns::sanitizeString($_POST);
+        $json_str=htmlspecialchars_decode(htmlspecialchars_decode($_POST['question_data']));
+        $q_data=json_decode($json_str,TRUE);
+
+        if($q_data===null)
+        {
+            $return_out['err']=TRUE;
+            $return_out['err_txt']='Ошибка парсинга файла JSON: Исключите в вопросах и ответах спец символы, такие как двойные ковычки, знак доллара и т.п. Попробуйте снова.';
+            echo json_encode($return_out);
+            exit;
+        }
+        //Ошибки обработаны, выполенение запросов к БД:
+            $t=new Tests($db);
+        //Сохранение изменений вопросов у варианта
+            $t->saveQuestions($q_data,$params['variant_link']);
+            $return_out['variant_link']=$params['variant_link'];
+
+        //Сохранение резервной копии теста
+                                    
+        $upl=new Uploads($f3->get('user_test_data_path'),$f3->get('user.login'));
+        //получение данных теста
+            $test_struct=$t->GetUserTest($params['variant_link']);
+            if( count($test_struct)==0 ){
+                $return_out['err']=TRUE;
+                $return_out['err_txt']='Ошибка: Данные теста не найдены, повторите операцию';
+                echo json_encode($return_out);
+                exit;
+            }
+        
+        if( $upl->UploadJSONTestData(json_encode([
+            'test'=>$test_struct,
+            'variant'=>$t->GetTestVariant($params['variant_link']),
+            'qsts'=>$q_data
+        ]), $params['variant_link']) !== FALSE )
+        {
+        
+        //Ссылка на архив теста для загрузки на стороне пользователя
+            $backup=$upl->GetBackupPath($params['variant_link']);
+
+        //Генерация архива и ссылки на него
+            HZip::zipDir($backup['folder'],$backup['link']);
+            $return_out['test_file_link']=$f3->get('SITE_DOMAIN').$backup['link'];
+        //генерация ссылки на готовый вариант теста
+            $return_out['link'] = $f3->get('SITE_DOMAIN').'test/'.$params['variant_link'];
         }else{
             $return_out['err']=TRUE;
             $return_out['err_txt'].=' Ошибка при сохранении JSON данных теста, проверьте кодировку или попробуйте снова';
         }
-    
+        echo json_encode($return_out);
     }
+
 }
 
 ?>

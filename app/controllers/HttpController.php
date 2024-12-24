@@ -62,7 +62,7 @@ class HttpController
 		}
 	}
 	/**
-     * <p>Редактирование данных теста (без вопросов) в интерфейсе будет шаг 1/4</p>
+     * <p>Редактирование данных теста (без вопросов) в интерфейсе будет шаг 1/3</p>
     */
 	public function editorTestPage($f3,$params=NULL)
 	{
@@ -83,19 +83,21 @@ class HttpController
 					$t=new Tests($db);
 					if( $t->CheckTestAuthor_link($params["variant_link"], $f3->get('user.id')) )
 					{
-						$test_data=$t->makeOldTest($t->GetUserTest($params["variant_link"]));
-						$err_txt=$test_data['err_txt'];
-						$vd=$t->GetTestVariants($params["variant_link"]);
+						$test_data=$t->GetUserTest($params["variant_link"])[0];
+						
+						if (count($test_data) == 0) {
+							$f3->reroute("/".urlencode('Ошибка: Данных теста не найдено'));
+						}
+						$vd=$t->GetAllTestVariants($params["variant_link"]);
 					}else{
 						$err_txt='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию или закройте данное окно и попробуйте создать свой тест.';
 					}
-					
 				}
 			}else{
 				$err_txt='Произошла ошибка при получении данных теста. Повторите операцию или создайте новый тест';
 			}
 			if($err_txt!==''){
-				$f3->reroute("/".$err_txt);
+				
 			}
 
 			// Отображение Редактора теста с данными если они были найдены
@@ -116,59 +118,55 @@ class HttpController
 			$f3->reroute("/".urlencode("Перед тем как использовать Редактор, Вам необходимо Войти"));
 		}
 	}
+	/**
+     * <p>Редактирование вопросов конкретного варианта: в интерфейсе будет шаг 2/3</p>
+    */
+	public function editorQuestionsPage($f3,$params=NULL) {
+		global $db;
+		$logErrTxt=Security::loginTest($f3,$db);
+		
+		if($f3->get("user.access")<=1){
+			//Пользователь не найден: переход на начальную страницу
+			$f3->reroute("/".urlencode("Перед тем как использовать Редактор, Вам необходимо Войти"));
+		}
+		// Пользователь найден
+		if(preg_match("/[^0-9a-z_]/",$params["variant_link"]))
+		{
+			$f3->reroute("/".'Произошла ошибка при получении данных теста. Повторите операцию или создайте новый тест');
+		}
+		$err_txt='';
+		//variant_link чист и готов к обработке
+		//получение списка вопросов
+		$t=new Tests($db);
+		$q_data=$t->getQuestionData($params["variant_link"]);
 
+		//формаирование разметки и возврат клиенту
+		$v=new Views($f3);
+		echo $v->Htmlrender(
+			'Редактор - Testify',
+			$v->BodyMainPage(
+			$v->Header(TRUE),
+			[
+				$v->QuestionEditor($q_data)
+			],
+			$v->Footer()
+			)
+		);
 
-
-
-
-
-
+	}
 
 	/**
-     * <p>Отображение Редактора теста</p>
+     * <p>Переносит на редактор вариантов теста editorTestPage</p>
     */
     public function editorPage($f3,$params=NULL)
 	{
 		global $db;
-		$logErrTxt=Security::loginTest($f3,$db);
-		
-		if($f3->get("user.access")>1){
-			// Пользователь найден
-			$test_data=null;
-			$err_txt='';
-			
-			if(!preg_match("/[^0-9a-z_]/",$params["variant_link"]))
-			{
-			// Определение: редактирование существующего или создание нового теста	
-				if($params["variant_link"]!=='0')
-				{
-					// Изменение существующего теста: получение данных
-					$t=new Tests($db);
-					if( $t->CheckTestAuthor_link($params["variant_link"], $f3->get('user.id')) )
-					{
-						$test_data=$t->GetFullUserTest($params["variant_link"]);
-					}else{
-						$err_txt='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию или закройте данное окно и попробуйте создать свой тест.';
-					}
-				}
-			}else{
-				$err_txt='Произошла ошибка при получении данных теста. Повторите операцию или закройте данное окно и создайте новый тест';
-			}
-			// Отображение Редактора с данными если они были найдены
-			$v=new Views($f3);
-			echo $v->Htmlrender(
-				'Редактор - Testify',
-				$v->BodyMainPage(
-				$v->Header(TRUE),
-				[$v->Editor($test_data,$err_txt)],
-				$v->Footer()
-				)
-			);
-
-		}else{
-			//Пользователь не найден: переход на начальную страницу
-			$f3->reroute("/".urlencode("Перед тем как использовать Редактор, Вам необходимо Войти"));
+		if(preg_match("/[^0-9]/",$params["test_id"]))
+		{
+			$f3->reroute("/".urlencode("Неверно передана ссылка, повторите операцию еще раз."));
 		}
+		$t=new Tests($db);
+		$f3->reroute("/edit/test/".$t->GetAllTestVariants_tid($params["test_id"])[0]['link']);
     }
     function profilePage()
 	{

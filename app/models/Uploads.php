@@ -3,18 +3,14 @@
 class Uploads{
     //Пути директорий относительно контроллера 
     public 
-        $file_dir,
-        $ava_dir;
+        $file_dir;
     //$ext - Допустимые форматы файлов. Сохранить можно только фото, аудио и видео.
 	public static $ext;
-	public static function GetUserPath($user_test_data_path,$login)
-	{
-		return $user_path.'/'.md5($login).'/';
-	}
+
 	public function __construct($user_test_data_path,$login){
 		
-		$this->file_dir=static::GetUserPath($user_test_data_path,$login);
-        $this->ava_dir='img/user_avas/u_id_'.$user_data['id'];
+		$this->file_dir=$user_test_data_path.'/'.md5($login).'/';
+
         if(!is_dir($this->file_dir)) {
 			mkdir($this->file_dir, 0777, true);
 		}
@@ -41,19 +37,20 @@ class Uploads{
     }
     /**
      * <p>Сохраняет переданые файлы на сервер</p>
-     * @param string index в масиве FILES
+     * @param array file_data файл в масиве FILES
+     * @param string variant_link ссылка на вариант
      * @return string сообщение об ошибке или пустая строка если ошибок нет
     */
-	public function UploadFile($file_data,$test_link){
+	public function UploadFile($file_data,$variant_link){
 		$out='';
 		if(in_array( $file_data['type'], static::$ext))
 		{
             $tmp_file_name = $file_data["tmp_name"];
-			$dest_file_name = $this->file_dir.$test_link.'/'.$file_data["name"];
+			$dest_file_name = $this->file_dir.$variant_link.'/'.$file_data["name"];
 
-			if(!is_dir($this->file_dir.$test_link.'/'))
+			if(!is_dir($this->file_dir.$variant_link.'/'))
 			{
-				mkdir($this->file_dir.$test_link.'/', 0777, true);
+				mkdir($this->file_dir.$variant_link.'/', 0777, true);
 			}
             move_uploaded_file($tmp_file_name, $dest_file_name);
         }else{
@@ -63,24 +60,31 @@ class Uploads{
 		return $out;
 	}
 	/**
-	 * <p>Помещает в текущую директорию файл test.txt содержащий json строку данных теста</p>
+	 * <p>Помещает в текущую директорию файл test.json содержащий json строку данных теста, вопросов, файлов и ответов</p>
+	 * @param string json строка данных теста
 	 * @param string json строка данных теста
 	 * @return mixed результат работы file_put_contents()
 	*/
-	public function UploadJSONTestData($json_str,$test_link){
-		if(!is_dir($this->file_dir.$test_link.'/')) {
-			mkdir($this->file_dir.$test_link.'/', 0777, true);
+	public function UploadJSONTestData($json_str,$variant_link){
+		if(!is_dir($this->file_dir.$variant_link.'/')) {
+			mkdir($this->file_dir.$variant_link.'/', 0777, true);
 		}
-		return file_put_contents($this->file_dir.$test_link.'/'.'test.txt',$json_str);
+		return file_put_contents($this->file_dir.$variant_link.'/'.'test.json',$json_str);
 	}
-
 	/**
-	 * <p>Удаляет тест из файловой системы по его id</p>
-	 * @param string test_link
+	 * <p>Возвращает путь и имя файла резервной копии, доступной для скачивания</p>
 	*/
-	public function DeleteTest($test_link)
+	public function GetBackupPath($variant_link) {
+		return ['link'=>$this->file_dir.$variant_link.'/variant_'.date('is').'.zip',
+		'folder'=>$this->file_dir.$variant_link.'/'];
+	}
+	/**
+	 * <p>Удаляет файлы варианта из файловой системы по его variant_link</p>
+	 * @param string link
+	*/
+	public function DeleteTest($variant_link)
 	{
-		$this->_removeDir($this->file_dir.$test_link.'/');
+		$this->_removeDir($this->file_dir.$variant_link.'/');
 	}
 	protected function _removeDir($path)
 	{

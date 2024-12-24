@@ -229,10 +229,10 @@
                     </div>
                     <div class="flex_fe_r_ac">
                         <div class="test_btn mr_r_10">
-                            <a title="Статистика прохождения теста" href="statistics/TODO/"><img alt="Статистика" src="stat_test.svg"></a>
+                            <a title="Статистика прохождения теста" href="statistics/'.$test['id'].'/"><img alt="Статистика" src="stat_test.svg"></a>
                         </div>
                         <div class="test_btn mr_r_10">
-                            <a title="Изменить тест"  href="editor/TODO/"><img alt="Изменить" src="change_test.svg"></a>
+                            <a title="Изменить тест"  href="editor/'.$test['id'].'/"><img alt="Изменить" src="change_test.svg"></a>
                         </div>
                         <div class="test_btn">
                             <a title="Удалить тест" class="test_del_btn" href="delete_test/TODO/"><img alt="Удалить" src="minus_test.svg"></a>
@@ -287,7 +287,7 @@
                                 <img id="imgprof_'.$view_data['u']['id'].'" src="'.$view_data['u']['ava_url'].'">
                             </div>
                         </div>
-                        <h1 class="profile_info">'.$view_data['u']['name'].'</h1>
+                        <h1 class="profileinjsfo">'.$view_data['u']['name'].'</h1>
                     </div>
                     <div class="note">
                         <div class="tst_srch">
@@ -339,14 +339,11 @@
         public function TestEditor($td=null,$vd=null){
             $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','editor.css']);
             $this->_setJs(['jquery-3.3.1.js','editTest.js']);
-            $html='';
-            if(!isset($td))
-            {
-                $td['test']=null;
-            }
-            $html.=$this->_getEditorTestTitle($td['test']); 
+
                 //Возврат разметки для нового теста
                 //Заголовок теста
+            $html=$this->_getEditorTestTitle($td); 
+            
             $html='<div class="content">
                 <div>
                     <p class=" ar_txt">Шаг 1/3</p>
@@ -390,27 +387,92 @@
                         </p> 
                         <br><br>';
             foreach ($vd as $k=>$v) {
-                $html.=$this->_getEditorVariant($v,$test_id,$k);
+                $html.=$this->_getEditorVariant($v,$test_id,$k+1);
             }
-            $html.='<a  title="Добавить вариант теста" class="qst_btn add_answ_btn" href="'.$test_id.'"><img alt="Добавить вариант теста" src="add_test.svg"></a>
+            $html.='<a  title="Добавить вариант теста" class="qst_btn add_elem_btn" href="'.$test_id.'"><img alt="Добавить вариант теста" src="add_test.svg"></a>
             
                     </div>
+                    <input id="v_countjs" type="hidden" value="'.count($vd).'">
                 </form>
             </div>
             </div>
             ';
             return $html;
         }
+        /**
+         * <p>Возвращает DOMString Редактора вопросов теста. Для идентификации ответа в закрытом вопросе: 1(вопрос)_1(id ответа)_qst_answ</p>
+         * @param array Данные вараинта которые необходимо отредактировать.
+         * @return string
+        */
+        public function QuestionEditor($qst_data) {
+            $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','editor.css','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.css','modal.css']);
+                $this->_setJs(['jquery-3.3.1.js','editor.js','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.js']);
 
+            $html='';  
+            
+            
+            //Заголовок теста
+            $html.='
+            <div class="content"> 
+                <div>
+                    <p class=" ar_txt">Шаг 2/3</p>
+                </div>
+                '.$this->_getEditorVariantTitle($qst_data['variant']);
+            $q_count=count($qst_data['questions']);
+            if($q_count==0){
+                $html.=$this->_getEditorQuestion();
+            }else{
+                for ($i=0; $i < $q_count; $i++) { 
+                    $html.=$this->_getEditorQuestion(
+                        $qst_data['questions'][$i],
+                        $qst_data['answers'][$qst_data['questions'][$i]['id']],
+                        $qst_data['files'][$qst_data['questions'][$i]['id']],
+                        $i+1,$q_count
+                    );
+                }
+            }
 
-
+            $html.='
+            <a title="Добавить вопрос: Двойной клик - добавить уже созданый" id="add_qst_btn" class="qst_btn" href="#"><img alt="Добавить вопрос" src="add_test.svg"></a>
+            
+                <div class="note">
+                    <div class="flex_c_r ">
+                        <a href="" id="confirm_edit_btn" class="confirm_edit_btn ac_txt">Следующий шаг</a>
+                    </div>
+                </div>
+            
+            </div>
+            <div id="ex1" class="modal">
+                <p class=" ar_txt">Шаг 3/3</p>
+                <p>
+                    Ссылка на проохождение варианта теста: <a href="" id="a_test_link"></a><br><br>
+                    Прохождение варианта будет доступно только для тех, у кого есть эта ссылка!
+                </p>
+                <br>
+                <p>
+                    Архив с вариантом теста был закружен на ваше устройство в качестве резервной копии. Сохраните его в удобном для вас месте, позже вы сможете изменить этот тест, загрузив этот архив на странице профиля.
+                    <br><br>
+                </p>
+                
+                <a href="'.static::$f3->get("SITE_DOMAIN").'">Выйти из редактора</a>
+            </div>
+            '.$this->_GetErrWrap('');
+            return $html;
+        } 
+        public function _getEditorVariantTitle($var) {
+            return '<div class="note">
+                <h3>Редактировние варианта: '.$var['title'].'</h3>
+                <p>Вы можете добавить вопрос нажав на кнопку +</p>
+                <input type="hidden" value="'.$var['link'].'" id="variant_link">
+            </div>';
+        }
 
         /**
          * <p>Возвращает DOMString Редактора теста. Для идентификации ответа в закрытом вопросе: 1(вопрос)_1(id ответа)_qst_answ</p>
          * @param array Данные теста которые необходимо отредактировать.
          * @return string
         */
-        public function Editor($td=null)
+        /* public function Editor($td=null)
         {
          
             $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','editor.css','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.css','modal.css']);
@@ -476,13 +538,13 @@
             </div>
             ';
             return $html;
-        }
+        } */
       /**
          * <p>Возвращает заголовок редактора теста</p>
          * @param array test_data['test'] - данные заголовка теста test_cu - новый или старый тест
          * @return string DOMString
         */
-        protected function _getEditorTestTitle($test=null)
+        protected function _getEditorTestTitle($test=null,$variant_link='0')
         {
             if($test===null){
                 $test=[
@@ -491,8 +553,7 @@
                     'limit'=>'1',
                     'description'=>'',
                     'start'=>date("Y-m-d H:i"),
-                    'end'=>date("Y-m-d H:i",time()+60*60*24*7),
-                    'cu'=>'new'
+                    'end'=>date("Y-m-d H:i",time()+60*60*24*7)
                 ];
             }
             return '<div class="note">
@@ -515,7 +576,7 @@
                                     <p class="mr_l_10">по:</p>
                                     <input type="datetime-local" id="end" name="end" value="'.$test['end'].'" min="'.date("Y-m-d H:i").' max="'.date("Y-m-d H:i",time()+60*60*24*365).'">
                                     <br>
-                                    <input type="hidden" id="test_cu" value="'.$test['cu'].'">
+                                    
                                     <input type="hidden" id="test_id" value="'.$test['id'].'">
                                 </div>
                             </form>
@@ -525,9 +586,9 @@
 
         /**
          * <p>Возвращает разметку Вопроса</p>
-         * @param array $q - test_data['question'][i] данные текущего вопроса
-         * @param array $f - test_data['file'][i] информация о файлах
-         * @param array $a - test_data['answer'][i] данные ответов на этот вопрос
+         * @param array $q - QuestionData['question'][i] данные текущего вопроса
+         * @param array $f - QuestionData['file'][i] информация о файлах
+         * @param array $a - QuestionData['answer'][i] данные ответов на этот вопрос
          * @param array $q_cur_num - текущий номер вопроса
          * @param array $q_count - всего вопросов в тесте
          * @return string DOMString
@@ -543,6 +604,7 @@
                     'is_vid_hidden'=>0
                 ];
                 $a[0]=[
+                    'id'=>0,
                     'text'=>'',
                     'price'=>'0',
                     'fine'=>'0'
@@ -552,11 +614,11 @@
 
 
             $html='
-            <div id="'.$q['id'].'_q" class="note">
+            <div id="'.$q['id'].'_q" class="questionjs note">
                 <div class="flex_sb_r">
                     <form class="decor" method="post" action="new_test/">
                         <div class="form-inner">
-
+                            <input type="hidden" name="qidjs" class="qidjs" value="'.$q['id'].'">
                             <input type="text" class="fs12_txt qst_title" name="qst_title" placeholder="Заголовок" value="'.$q['title'].'" required>
                             <div class="flex_sb_r flex_wr">
                                 <div class="qst_type flex_sb_r_ac">
@@ -575,7 +637,7 @@
 
                             <textarea name="note_txt" class="edit_txt qst_txt" placeholder="Текст вопроса" rows="4" required>'.$q['text'].'</textarea>
                             <div class="flex_sb_r_ac flex_wr">
-                                <input class="file_in UserIn" id="'.$q['id'].'_files" accept="image/*,video/*,audio/*" name="user_files[]" type="file" multiple>
+                                <input class="fileinjs UserIn" id="'.$q['id'].'_files" accept="image/*,video/*,audio/*" name="user_files[]" type="file" multiple>
                                 <div class="flex_fs_r_ac">
 
                                     <input class="mr_r_10" type="checkbox" name="is_vid_hidden" id="'.$q['id'].'_is_vid_hidden" '.($q['is_vid_hidden']==1?'checked':'').'>
@@ -589,7 +651,7 @@
                                     for ($i=0; $i < $f_count; $i++) { 
                                         $html.='<p class="italyc_txt">'.$f[$i]['file_name'].'</p>';
                                     }
-                                    $html.='<p class="alert_txt"><br>Перед тем как Завершить редактирование выберете эти файлы заново</p>';
+                                    $html.='<p class="alert_txt"><br>Перед тем как приступить к Следующему шагу выберете эти файлы заново</p>';
                                 }
                                 
                             
@@ -605,7 +667,8 @@
                                     //Перебор ответов
                                     if($q['is_open']==1){//Если вопрос открытый
                                         $html.='
-                                        <div class="'.$q['id'].'_qst_answ flex_fs_r_ac">
+                                        <div class="qstanswjs flex_fs_r_ac">
+                    <input type="hidden" name="answidjs" class="answidjs" value="'.$a[0]['id'].'">
                     
                                             <textarea rows="1" class=" mr_r_10" name="'.$q['id'].'_0_qst_answ" placeholder="Текст ответа" value="'.$a[0]['text'].'" required>'.$a[0]['text'].'</textarea>
                                             
@@ -617,7 +680,8 @@
                                         foreach ($a as $k=>$v) {
                                             
                                             $html.='
-                                            <div class="'.$q['id'].'_qst_answ flex_fs_r_ac">
+                                            <div class="qstanswjs flex_fs_r_ac">
+                                                <input type="hidden" name="answidjs" class="answidjs" value="'.$v['id'].'">
                                             
                                                 <span class="fs14_txt answ_number mr_r_10">1</span>
                                                 <textarea rows="1" class=" mr_r_10" name="'.$q['id'].'_'.
@@ -754,16 +818,19 @@
 
             return '
 
-            <div class="'.$test_id.'_var flex_fs_r_ac">
-                                    
-                <span class="fs14_txt answ_number mr_r_10">$cur_num</span>
-                <textarea rows="1" class=" mr_r_10" name="'.$q['id'].'_'.
-                $k.'_qst_answ" placeholder="Название Варианта" value="'.
+            <div class="'.$test_id.'_test_var flex_fs_r_ac">
+                <div class="flex_c_r_ac">
+                    <input type="radio" class="chosen_variant" name="variant" value="'.$vd['link'].'">
+                    <span class="fs14_txt answ_number mr_r_10">'.$cur_num.'</span>
+                </div>               
+
+                <textarea rows="1" class="title mr_r_10" name="'.$vd['id'].'_id_var" placeholder="Название Варианта" value="'.
                 $vd['title'].'" required>'.$vd['title'].'</textarea>
                 
-                <input type="hidden" name="var_cu" class="var_cu"  value="'.$vd['cu'].'">
-                
-                <a title="Удалить вариант теста" class="qst_btn_alt del_answ_btn" href="'.$q['id'].'"><img alt="Удалить вариант теста" src="minus_test.svg"></a>
+                <input type="hidden" name="variant_id" class="variant_id"  value="'.$vd['id'].'">
+
+
+                <a title="Удалить вариант теста" class="qst_btn_alt del_answ_btn" href="'.$vd['id'].'"><img alt="Удалить вариант теста" src="minus_test.svg"></a>
             
             </div>
             ';
@@ -917,7 +984,7 @@
                 return $html;
         }
 
-        public function Statistics($view_data, $res_data, $err_txt='')
+        /* public function Statistics($view_data, $res_data, $err_txt='')
         {
            
             $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','check.css']);
@@ -997,7 +1064,7 @@
             $html.='</div>
             </div>';
             return $html;
-        }
+        } */
 
 
         /**
@@ -1011,9 +1078,7 @@
             $this->_setCss(['https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.css']);
             return '
                 <div id="err_wrap" class="modal">
-                    <p id="exept_txt">
-                        '.$err_txt.'
-                    </p>
+                    <p id="exept_txt">'.$err_txt.'</p>
                     <br>
                     <a href="'.static::$f3->get("SITE_DOMAIN").'">Обратно в профиль</a>
                 </div>

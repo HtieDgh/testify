@@ -7,14 +7,15 @@ class Tests{
      /**
      * <p> Принимает test_data и добавляет тест в бд</p>
      * @param array td - данные о тесте 
+     * @param array vd - данные о вариантах этого теста 
      * @param array user_id - автор теста
-     * @return bool результат $db->exec()
+     * @return int id созданого теста
      */ 
-    public function createTest($td,$user_id) {
+    public function CreateTest($td,$user_id) {
         $q="SELECT MAX(id) as \"max_id\" FROM test";
-        $cur_test_id=intval(static::$db->exec($q)[0]['max_id']);
-        $cur_test_id++;
-        $q_t="INSERT INTO test (
+        $cur_id=intval(static::$db->exec($q)[0]['max_id']);
+        $cur_id++;
+        $q="INSERT INTO test (
             id,
             s_a_id,
             title,
@@ -23,9 +24,10 @@ class Tests{
             \"start\",
             \"end\"
         ) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        return static::$db->exec($q_t,
+
+        $rv=static::$db->exec($q,
         [
-            $cur_test_id,
+            $cur_id,
             $user_id,
             $td['title'],
             $td['description'],
@@ -33,22 +35,93 @@ class Tests{
             $td['test_start'],
             $td['test_end']
         ]);
+
+        return $cur_id;
+    }
+    //Возварщает variant_link активного теста для последующего заполнения вопросами
+    public function CreateVariants($test_id,$vd){
+        $q="SELECT MAX(id) as \"max_id\" FROM variant";
+        $cur_id=intval(static::$db->exec($q)[0]['max_id']);
+        $cur_id++;
+
+        $q="INSERT INTO variant (
+            id,
+            test_id,
+            title,
+            link
+        ) VALUES (?,?,?,?)";
+        $out='';
+        foreach ($vd as $v) 
+        {
+            $variant_link=md5($test_id.$v['title']);
+            if($v['is_active']){
+                $out=$variant_link;
+            }
+            static::$db->exec(
+                $q,
+                [
+                    $cur_id,
+                    $test_id,
+                    $v['title'],
+                    $variant_link
+                ]
+            );
+            $cur_id++;
+        }
+        return $out;
+    }
+    public function UpdateVariants($vd,$test_id) {
+        $out='';
+        $q="SELECT MAX(id) as \"max_id\" FROM variant";
+        $cur_id=intval(static::$db->exec($q)[0]['max_id']);
+        $cur_id++;
+
+        foreach ($vd as $v) {
+            if($v['is_active']){
+                $out = $v['link'] == '0'?md5($test_id.$v['title']):$v['link'];
+            }
+            if($v['link']=='0'){
+                //Был добавлен новый вариант в старый тест
+                static::$db->exec("INSERT INTO variant (
+                    id,
+                    test_id,
+                    title,
+                    link
+                ) VALUES (?,?,?,?)",
+                [
+                    $cur_id++,
+                    $test_id,
+                    $v['title'],
+                    md5($test_id.$v['title'])
+                ]);
+            }else{
+                //TODO БД может и не обновить строки
+                static::$db->exec("UPDATE variant
+                SET title=?
+                WHERE link=?",
+                [
+                    $v['title'],
+                    $v['link']
+                ]);
+            }
+        }
+        return $out;
     }
     /**
      * <p> Принимает test_data и обновляет тест в бд</p>
      * @param array td - данные о тесте 
      * @return bool результат $db->exec()
      */ 
-    public function updateTest($td) {
+    public function UpdateTest($td) {
 
-        $q_t="UPDATE test 
+        $q="UPDATE test 
         SET title=?,
-         \"description\"=?
-         \"limit\"=? 
+         \"description\"=?,
+         \"limit\"=?, 
          \"start\"=?,
          \"end\"=?
         WHERE id=?";
-        return static::$db->exec($q_t,
+        return static::$db->exec($q,
         [
             $td['title'],
             $td['description'],
@@ -58,6 +131,23 @@ class Tests{
             $td['test_id']
         ]);
     }
+
+    public function getQuestionData($variant_link){
+
+        $q="SELECT q.* FROM question q
+        INNER JOIN variant_question v_q ON v_q.question_id=q.id
+        INNER JOIN variant v ON v.id=v_q.variant_id
+        WHERE v.link='$variant_link'";
+        $quest_data['questions']=static::$db->exec($q);
+        $quest_data['variant']=$this->GetTestVariant($variant_link);
+        
+        foreach ($quest_data['questions'] as $v) 
+        {
+            $quest_data['answers'][$v['id']]=static::$db->exec("SELECT * FROM answer a WHERE a.question_id=".$v['id']);
+            $quest_data['files'][$v['id']]=static::$db->exec("SELECT qf.* FROM question_file qf  WHERE qf.q_id=".$v['id']);
+        }
+        return $quest_data;
+    }
     /**
      * <p> Принимает test_data и добавляет тест в бд</p>
      * @param array td - данные о тесте вопросах и вариантах ответов
@@ -65,7 +155,7 @@ class Tests{
      * @param array user_name
      * @return array ассоциативный массив с id тестом и уникальным индентификатор-ссылкой для прохождения теста
     */
-    /* public function AddTest($td,$user_id,$user_name)
+    /* public function CreateTest($td,$user_id,$user_name)
     {
         
     //Получение различных ids для создоваемого теста
@@ -188,21 +278,13 @@ class Tests{
         ");
     }
     public function GetUserTest($variant_link){
-        $test_data['err']=FALSE;
-        $test_data['err_txt']='';
-        $test_data['test'] = static::$db->exec("SELECT t.* FROM test t INNER JOIN variant v ON t.id=v.test_id WHERE v.link='$variant_link'");
-
-        if (count($test_data['test']) == 0) {
-            $test_data['err']=TRUE;
-            $test_data['err_txt']='Ошибка: Данных теста не найдено';
-        }
-        return  $test_data;
+               
+        return  static::$db->exec("SELECT t.* 
+        FROM test t 
+        INNER JOIN variant v ON t.id=v.test_id 
+        WHERE v.link='$variant_link'");
     }
-    public function makeOldTest($test_data){
-        $test_data['cu']='old';
-        return $test_data;
-    }
-    public function GetTestVariants($variant_link) {
+    public function GetAllTestVariants($variant_link) {
         return static::$db->exec("SELECT v.* 
         FROM variant v 
         WHERE v.test_id IN(
@@ -212,6 +294,120 @@ class Tests{
             WHERE _v.link='$variant_link')
         ");
     }
+
+    public function GetTestVariant($variant_link){
+        return static::$db->exec("SELECT v.*
+        FROM variant v
+        WHERE v.link='$variant_link'
+        ")[0];
+    }
+    public function GetAllTestVariants_tid($test_id) {
+        return static::$db->exec("SELECT v.* 
+            FROM variant v 
+            WHERE v.test_id = ?",
+            array($test_id)
+        );
+    }
+    /**
+     * <p>Создает вопросы для варианта</p>
+    */
+    public function saveQuestions($q_data,$variant_link) {
+        $vid=$this->GetTestVariant($variant_link)['id'];
+        $q="SELECT MAX(id) as max_id FROM question";
+        $cur_qst_id=intval(static::$db->exec($q)[0]['max_id'])+1;
+
+        $q="SELECT MAX(id) as max_id FROM answer";
+        $cur_answ_id=intval(static::$db->exec($q)[0]['max_id'])+1;
+
+        foreach ($q_data as $qst) {
+            //обработка вопросов, вставка или обновление
+            $qst['id']=intval($qst['id']);
+            if($qst['id']!=0){
+                $q="UPDATE question 
+                SET title=:qtl,
+                \"text\"=:qtxt,
+                is_open=:qio,
+                is_vid_hidden=:qisvh
+                WHERE id=:qid";
+                $cqid=$qst['id'];
+                
+            }else{
+                $q="INSERT INTO question (
+                id,
+                title,
+                \"text\",
+                is_open,
+                is_vid_hidden
+                ) VALUES(:qid,:qtl,:qtxt,:qio,:qisvh)";
+                $cqid=$cur_qst_id++;
+                
+            }
+            static::$db->exec($q,
+            array(
+				":qid"=>$cqid,
+				":qtl"=>$qst['title'],
+				":qtxt"=>$qst['text'],
+				":qio"=>$qst['is_open'],
+				":qisvh"=>$qst['is_vid_hidden']
+			));
+            
+            if($qst['id']==0){
+                static::$db->exec("INSERT INTO variant_question (variant_id,question_id) VALUES(?,?)",[$vid,$cqid]);
+            }
+            //Удаление существующей информации о файлах вопроса, т к она может быть не актуальной
+            static::$db->exec("DELETE FROM question_file WHERE q_id=?",array($cqid));
+            foreach ($qst['file_names'] as $f) {
+                static::$db->exec("INSERT INTO question_file (
+                q_id,
+                file_name,
+                mime
+                )VALUES(?, ?, ?)",
+                array(
+                    $cqid,
+                    $f['name'],
+                    strstr($f['mime'],'/',TRUE)
+                ));
+            }
+
+            foreach($qst['answs'] as $a){
+                //Обработка ответов аналогично
+                $a['id']=intval($a['id']);
+                if($a['id']>0){
+                    $q="UPDATE answer 
+                    SET \"text\"=:atxt,
+                    price=:ap,
+                    fine=:af
+                    WHERE id=:aid";
+                    $caid=$a['id'];
+                    static::$db->exec($q,
+                    array(
+                        ':aid'=>$caid,
+                        ':atxt'=>$a['text'],
+                        ':ap'=>$a['price'],
+                        ':af'=>$a['fine']
+                    ));
+                }else{
+                    $q="INSERT INTO answer (
+                    id,
+                    question_id,
+                    \"text\",
+                    price,
+                    fine
+                    ) VALUES(:aid,:qid,:atxt,:ap,:af)";
+                    $caid=$cur_answ_id++;
+                    static::$db->exec($q,
+                    array(
+                        ':aid'=>$caid,
+                        ':qid'=>$cqid,
+                        ':atxt'=>$a['text'],
+                        ':ap'=>$a['price'],
+                        ':af'=>$a['fine']
+                    ));
+                }
+            }
+        }
+    }
+
     /**
      * <p>Возвращает все данные теста, созданого пользователем, включая вопросы, ответы и файлы</p>
      * @param int test_id - id теста
@@ -331,7 +527,7 @@ class Tests{
      * @param array $answ_data
      * 
      */
-    public function AddResult($test_link, $user_id, $answ_data)
+ /*    public function AddResult($test_link, $user_id, $answ_data)
     {
         $date=date('Y-m-d H:i:s');
         //получение test id для Результата
@@ -432,7 +628,7 @@ class Tests{
                 $status
             ]
         );
-    }
+    } */
     /**
      * <p>Возвращает результаты пользователя у конкретного теста</p>
      *
@@ -544,4 +740,3 @@ class Tests{
     }
 }
 ?>
-
