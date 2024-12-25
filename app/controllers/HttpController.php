@@ -29,6 +29,7 @@ class HttpController
 			//Отображение Профиля, если пользователь прошел аутентификацию
 			$t=new Tests($db);
 			$view_data['sr_cancel']='';
+			$view_data['teast_head']='Ваши тесты';
 			$view_data['st_cancel']='';
 			$view_data['u']=$f3->get("user");
 			$view_data['u']['ava_url']=$f3->get("SITE_DOMAIN").'user_avas/default_ava.png';
@@ -47,6 +48,14 @@ class HttpController
 			);
 			$view_data['err_txt']=$err_txt;
 
+			if(isset($_GET['s_ut'])){
+				$view_data['s_ut']=$_GET['s_ut'];
+				$s_ut=$_GET['s_ut'];
+				$view_data['st_cancel']='Отменить поиск';
+			}else{
+				$s_ut='';
+				$view_data['s_ut']='Поиск по созданным вами тестам';
+			}
 
 			// В зависимости от уровня доступа шаблону нужны разные данные для отображения
 			switch ($view_data['u']['access']) {
@@ -55,21 +64,18 @@ class HttpController
 					$view_data['ut'] = array();
 					break;
 				case 2:// Роль Создатель теста
-					if(isset($_GET['s_ut'])){
-						$view_data['s_ut']=$_GET['s_ut'];
-						$s_ut=$_GET['s_ut'];
-						$view_data['st_cancel']='Отменить поиск';
-					}else{
-						$s_ut='';
-						$view_data['s_ut']='Поиск по созданным вами тестам';
-					}
 					$view_data['ut'] = $t->GetUserTests(
 						$f3->get("user.id"),
 						Tests::GetWhere($s_ut,['title','"start"::text','"end"::text'])
 					);
+
 					break;
 				case 3: // Роль Менеджер
-					$view_data['s_ut'] = 'Поиск по всем созданым тестам';//TODO
+					$view_data['ut'] = $t->GetAllUserTests(
+						Tests::GetWhere($s_ut,['title','"start"::text','"end"::text','s.name'])
+					);
+					$view_data['s_ut'] = 'Поиск по всем созданым тестам';
+					$view_data['teast_head']='Тесты в системе';
 					break;
 				default:
 					# TODO
@@ -94,13 +100,6 @@ class HttpController
 		global $db;
 		$logErrTxt=Security::loginTest($f3,$db);
 		$log_err_txt=Security::loginTest($f3,$db);
-        if( $f3->get('user.access')==0 )
-        {
-            $return_out['err']=TRUE;
-            $return_out['err_txt']=$log_err_txt;
-            echo json_encode($return_out);
-            exit;
-        }
 
 		if($f3->get("user.access")>1){
 			// Пользователь найден
@@ -114,7 +113,7 @@ class HttpController
 				{
 					// Изменение существующего теста: получение данных
 					$t=new Tests($db);
-					if( $t->CheckTestAuthor_link($params["variant_link"], $f3->get('user.id')) )
+					if( $t->CheckTestAuthor_link($params["variant_link"], $f3->get('user.id')) || $f3->get("user.access")==3)
 					{
 						$test_data=$t->GetUserTest($params["variant_link"])[0];
 						
@@ -127,10 +126,7 @@ class HttpController
 					}
 				}
 			}else{
-				$err_txt='Произошла ошибка при получении данных теста. Повторите операцию или создайте новый тест';
-			}
-			if($err_txt!==''){
-				
+				$f3->reroute("/".urlencode('Перед тем как редактировать тесты вам необходимо войти.'));
 			}
 
 			// Отображение Редактора теста с данными если они были найдены
@@ -296,7 +292,9 @@ class HttpController
 		$t=new Tests($db);
 
 		if(!$t->CheckTestAuthor_tid($params['test_id'],$f3->get('user.id')) ){
-            $f3->reroute("/".'Вы не авторизованы для выполнения данной операции');
+			if($f3->get("user.access")!=3){
+				$f3->reroute("/".'Вы не авторизованы для выполнения данной операции');
+			}
         }
 		//Обработка поискового запроса
 		 if(isset($_GET['results_search']))
@@ -345,7 +343,129 @@ class HttpController
 		);
 	}
 
+	public function accountsPage($f3,$params=NULL) {
+		global $db;
+		$logErrTxt=Security::loginTest($f3,$db);
+		
+		if($f3->get("user.access")!=3){
+			//Пользователь не найден или не имеет доступа: переход на начальную страницу
+			$f3->reroute("/".urlencode("Перед тем как редактировать учетные записи, Вам необходимо Войти"));
+		}
+		//Получение данных о поиске
+		 if(isset($_GET['s_ua'])){
+			$view_data['s_ua']=$_GET['s_ua'];
+			$s_ut=$_GET['s_ua'];
+			$view_data['st_cancel']='Отменить поиск';
+		 }else{
+			$s_ut='';
+			$view_data['st_cancel']='';
+			$view_data['s_ua']='Поиск по учетным записям';
+		 }
+		 $html_txt='';
+		 $head_label='Новый пользователь';
+		 $pass_notiece='';
+		 $rec=array("name"=>"","login"=>"","pass"=>"","access"=>"","id"=>"","created"=>"");
 
+		if(isset($_GET['user_id'])&&isset($_GET['edit_type'])){
+			/**(И) если: Первый вход на страницу */
+			$user_id=$_GET['user_id'];
+			$ed_type=$_GET['edit_type'];
+	
+			$pass_notiece='<p class="alert_txt">Внимание пароль зашфрован</p><p class="alert_txt">Введите свое значение если хотите изменить пароль</p>';
+			$head_label='Редактирование пользователя';
+			$rec=Security::GetUser($db,$user_id);
+		}else if(isset($_POST['user_id'])&&isset($_POST['edit_type'])){
+			/*(И) если: отправлены данные из формы */
+			$_POST=CFuns::sanitizeString($_POST);
+			$user_id=$_POST['user_id'];
+			$ed_type=$_POST['edit_type'];
+		}else{
+			$user_id='NULL';
+			$ed_type='0';
+		}
+
+		if(isset($_POST['u_login']) && 
+		isset($_POST['u_pass'])&&
+		isset($_POST['u_access'])&&
+		isset($_POST['u_name'])&&
+		isset($_POST['u_created'])){
+			$_POST=CFuns::sanitizeString($_POST);
+
+			$login = $_POST['u_login'];
+			$pass = strlen($_POST['u_pass'])==32 ?  $_POST['u_pass']:md5($_POST['u_pass']);
+			$acs = preg_replace("/[^0-3]/","",$_POST['u_access']); 
+			$name = $_POST['u_name'];
+			$creat = $_POST['u_created']!=''?$_POST['u_created']:date('d.m.Y H:i:s');    
+			switch($ed_type){
+				case '1'://Изменение
+					$params=array($login,$pass,$acs,$name,$creat,$user_id);
+					Security::SaveUser($db,$ed_type,$params);
+
+					$html_txt.='<p class="good_txt"><br>Пользователь изменен!</p>';
+					break;
+				case '0'://добавление
+					$params=array($login,$pass,$acs,$name,$creat);
+					//Проверка на существующего пользователя
+					if(count(Security::GetUser_login($db,$login))===0){
+						Security::SaveUser($db,$ed_type,$params);
+						$html_txt.='<p class="good_txt"><br>Пользователь добавлен!</p>';
+					}else{
+						$rec=array("name"=>$name,"login"=>$login,"pass"=>"","access"=>$acs,"id"=>"","created"=>$creat);
+						$html_txt.='<p class="alert_txt"><br>Пользователь с таким логином уже существует!</p>';
+				   }
+					break;
+				default:
+					$f3->reroute('/'.urlencode('Ошибка: передан неверно тип редактирования записи')) ;
+					break;
+			}
+				
+
+
+		}else if($_SERVER['REQUEST_METHOD']=='POST'){
+			$f3->reroute('/'.urlencode('Ошибка данные не переданы! Попробуйте снова'));
+		}
+
+		$users=Security::GetAllUsers($db,
+			Tests::GetWhere( $s_ut, ["name","login","pass","access::text","id::text","created::text"] )
+		);
+
+		$v=new Views($f3);
+		echo $v->Htmlrender(
+			'Решистрация - Testify',
+			$v->BodyMainPage(
+			$v->Header(),
+			[$v->Accounts(
+				$view_data,
+				$users,
+				$rec,
+				$head_label,
+				$user_id,
+				$ed_type,
+				$pass_notiece,
+				$html_txt
+			)],
+			$v->Footer()
+			)
+		);
+
+	}
+	/**
+	 * <p>Удаление пользователя</p>
+	*/
+    public function deleteUser($f3,$params=NULL) {
+        global $db;
+
+        $log_err_txt=Security::loginTest($f3,$db);
+        if( $f3->get('user.access')!=3 )
+        {
+            $f3->reroute('/'.urlencode('Недостаточно прав для удаления пользоватлея'));
+        }
+		if(preg_match("/[^0-9]/",$params["user_id"])){
+			$f3->reroute("/".urlencode('Произошла ошибка при получении индентификатора пользоватлея. Повторите операцию.'));
+		}
+		Security::deleteUser($db,$params["user_id"]);
+		$f3->reroute("/edit/accounts");
+    }
 	function exitPage($f3,$params=NULL) {
 		Security::exit();
 		header('Location: '.$f3->get("SITE_DOMAIN"));

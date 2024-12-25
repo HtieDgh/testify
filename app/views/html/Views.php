@@ -221,6 +221,9 @@
                 <div class="flex_sb_r_ac test_line mr_t_10">
                     <div>
                         <p>'.$test['title'].'</p><br>
+                        '.($view_data['u']['access']==3?'
+                        <p class="italyc_txt">Автор: '.$test['author_name'].'</p><br>
+                        ':'').'
                         <p>
                             Н: <span class="italyc_txt">'.date('d.m.Y H:i:s',strtotime($test['start'])).'</span><br>
                             К:  <span class="italyc_txt">'.date('d.m.Y H:i:s',strtotime($test['end'])).'</span>
@@ -254,6 +257,12 @@
             '.($view_data['u']['access'] > 1 ? '
                 <div class="u_t">
                         <div class="note">
+                            '.($view_data['u']['access']==3?'
+                            <div class="mr_b_10 settings">
+                                <a title="Редактировать учетные записи" href="'.static::$f3->get("SITE_DOMAIN").'edit/accounts"><img src="settings.png" alt="settings"></a>
+                            </div>
+                            ':'').'
+                            
                             <div class="tst_srch">
                                 <form method="GET" action="'.static::$f3->get("SITE_DOMAIN").'" class="flex_c_r">
                                     <input type="text" required name="s_ut" placeholder="'.$view_data['s_ut'].'">
@@ -265,7 +274,7 @@
                     
                         <div class="note">
                             <div class="flex_sb_r_ac">
-                                <h2>Ваши тесты</h2>
+                                <h2>'.$view_data['teast_head'].'</h2>
                                 <div class="flex_sb_r_ac">
                                     <div class="test_btn mr_r_10">
                                         <a title="Создать новый" href="edit/test/0"><img alt="Создать новый тест" src="add_test.svg"></a>
@@ -288,7 +297,9 @@
                                 <img id="imgprof_'.$view_data['u']['id'].'" src="'.$view_data['u']['ava_url'].'">
                             </div>
                         </div>
-                        <h1 class="profileinjsfo">'.$view_data['u']['name'].'</h1>
+                        <div class="flex_c_r mr_t_10">
+                            <h1 class="profileinjsfo">'.$view_data['u']['name'].'</h1>
+                        </div>
                     </div>
                     <div class="note">
                         <div class="tst_srch">
@@ -471,79 +482,6 @@
                 <input type="hidden" value="'.$var['link'].'" id="variant_link">
             </div>';
         }
-
-        /**
-         * <p>Возвращает DOMString Редактора теста. Для идентификации ответа в закрытом вопросе: 1(вопрос)_1(id ответа)_qst_answ</p>
-         * @param array Данные теста которые необходимо отредактировать.
-         * @return string
-        */
-        /* public function Editor($td=null)
-        {
-         
-            $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','editor.css','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.css','modal.css']);
-            $this->_setJs(['jquery-3.3.1.js','editor.js','https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.min.js']);
-            $html='';
-            if($err_txt!==''){
-                $html.=$this->_GetErrWrap($err_txt);
-            }
-            if(isset($td))
-            {//Возврат разметки для уже существующего теста
-                //Заголовок теста
-                $html.='
-                <div class="content">
-                    '.$this->_getEditorTestTitle($td['test']);
-                $q_count=count($td['question']);
-                for ($i=0; $i < $q_count; $i++) { 
-                    $html.=$this->_getEditorQuestion(
-                        $td['question'][$i],
-                        $td['answers'][$td['question'][$i]['id']],
-                        $td['files'][$td['question'][$i]['id']],
-                        $i+1,$q_count
-                    );
-                }
-                
-            }else{//Возврат разметки по умолчанию для нового теста
-                $html.='
-                <div class="content">
-                    '.$this->_getEditorTestTitle().'
-                    '.$this->_getEditorQuestion();
-                
-            }
-            $html.='    
-                <a title="Добавить вопрос: Двойной клик - добавить уже созданый" id="add_qst_btn" class="qst_btn" href="#"><img alt="Добавить вопрос" src="add_test.svg"></a>
-            
-                <div class="note">
-                    <div class="flex_c_r ">
-                        <a href="" id="confirm_edit_btn" class="confirm_edit_btn ac_txt">Завершить редактирование</a>
-                    </div>
-                </div>
-            
-            </div>
-            
-            <div id="ex1" class="modal">
-                <p>
-                    Ссылка на проохождение теста: <a href="" id="a_test_link"></a><br><br>
-                    Прохождение теста будет доступно только для тех, у кого есть эта ссылка!
-                </p>
-                <br>
-                <p>
-                    Архив с тестом был закружен на ваше устройство в качестве резервной копии. Сохраните его в удобном для вас месте, позже вы сможете изменить этот тест, загрузив этот архив на странице профиля.
-                    <br><br>
-                </p>
-                
-                <a href="'.static::$f3->get("SITE_DOMAIN").'">Выйти из редактора</a>
-            </div>
-            
-            <div id="ex2" class="modal">
-                <p id="exept_txt">
-                    
-                </p>
-                <br>
-                <a href="#" rel="modal:close">Закрыть окно</a>
-            </div>
-            ';
-            return $html;
-        } */
       /**
          * <p>Возвращает заголовок редактора теста</p>
          * @param array test_data['test'] - данные заголовка теста test_cu - новый или старый тест
@@ -1055,7 +993,7 @@
                             <button type="submit"><img src="'.static::$f3->get("SITE_DOMAIN").'search.png"></button>
                         </form>
                     </div>
-                    '.($view_data['s_cancel']!=''?$this->_getCancelBtn($view_data['s_cancel']):'').'
+                    '.($view_data['s_cancel']!=''?$this->_getCancelBtn($view_data['s_cancel'],'statistics/'.$test['test_id']):'').'
                 </div>
                 <div class="note">
                     <div class="flex_c_r">                            
@@ -1086,16 +1024,109 @@
             </div>';
             return $html;
         } 
-        protected function _getCancelBtn($t){
+        /**
+         * <p>Страница с отображением аккаунтов пользоватлей</p>
+        */
+        public function Accounts($view_data,$users,$rec,$head_label,$user_id,$ed_type,$pass_notiece,$html_txt){
+            $this->_setCss(['flexable.css','color_theme.css','general.css','decor_form.css','check.css','accounts.css']);
+            $html='';
+            
+            $html.='
+            <div class="content">
+                <div class="note">
+                    <div class="flex_c_r">
+                        <form class="decor" method="POST" action="'.static::$f3->get("SITE_DOMAIN").'edit/accounts/">
+                            <div class="form-inner">
+                                <p class="italyc"> 
+                                <h3>'.$head_label.'</h3><br>
+                                </p>
+                                <input type="hidden" name="user_id" value="'.$user_id.'">
+                                <input type="hidden" name="edit_type" value="'.$ed_type.'">
+                                
+                                <p class="good_txt">Имя</p>
+                                <input type="text" name="u_name" required placeholder="Имя" value="'.$rec['name'].'">
+                                <p class="good_txt">Дата регистрации. Поле можно оставить пустым - будет внесена текущая дата</p>
+                                <input type="text" name="u_created" placeholder="Напр. 2020-05-26" value="'.$rec['created'].'">
+                                
+                                <p class="good_txt">Логин</p>
+                                <input type="text" name="u_login" required placeholder="Логин" value="'.$rec['login'].'">
+                                <p class="good_txt">Пароль</p>
+                                '.$pass_notiece.'
+                                <input type="text" name="u_pass" required placeholder="Пароль" value="'.$rec['pass'].'">
+                                <p class="good_txt">Уровень доступа</p>
+                                <input type="text" name="u_access" required placeholder=" Уровень доступа" value="'.$rec['access'].'">
+
+                                <div class="flex_c_r flex_wr">
+                                    <input type="submit" value="'.$head_label.'">
+                                </div>
+                                
+                                '.$html_txt.'
+                            </div>
+                        </form>
+                    </div>
+                        
+                    
+                </div>
+                <div class="note">
+                    <div class="tst_srch">
+                        <form method="GET" action="'.static::$f3->get("SITE_DOMAIN").'edit/accounts" class="flex_c_r">
+                            <input type="text" required name="s_ua" placeholder="'.$view_data['s_ua'].'">
+                            <button type="submit"><img src="'.static::$f3->get("SITE_DOMAIN").'search.png"></button>
+                        </form>
+                    </div>
+                    '.($view_data['st_cancel']!=''?$this->_getCancelBtn($view_data['st_cancel'],'edit/accounts'):'').'
+                </div>
+                <div class="note">
+                    <p class="good_txt italyc">Управление пользователями:</p><br>
+                    <br><br>
+                    <p>Все пользователи: id | логин | пароль | имя | доступ | дата регистрации</p><br>
+                    '.$this->_getUserTable($users).'
+                </div>
+            </div>';
+            return $html;
+        }
+
+        protected function _getUserTable($result,$c=''){
+            if($c!==''){
+                switch($c[0]){
+                    case '.':
+                        $c=substr($c,1);
+                        $c="class='$c'";
+                        break;
+                    case '#':
+                    $c=substr($c,1);
+                        $c="id='$c'";
+                        break;
+                    default:
+                        $c="style='$c'";
+                        break;
+                }
+            }
+            $html_txt='<div  '.$c.'>';
+            foreach ($result as $v) {
+                
+                $html_txt.='<hr><br><p>';
+                foreach ($v as $va) {
+                    $html_txt.=' | '.$va;
+                }
+                 $html_txt.='</p><a class="page_nums_rev" href="'.static::$f3->get("SITE_DOMAIN").'edit/accounts?edit_type=1&user_id='.$v['id'].'">Изменить</a> <a class="rounded_red_rev" href="'.static::$f3->get("SITE_DOMAIN").'delete/accounts/'.$v['id'].'">Удалить </a><br><br>';
+            }
+            $html_txt.='</div>';
+            return  $html_txt;
+        }
+        /**
+         * <p>Возвращает разметку кнопки отмены поиска</p>
+        */
+        protected function _getCancelBtn($t,$link=''){
             return '<div class="flex_c_r mr_t_10">
-                <a href="'.static::$f3->get("SITE_DOMAIN").'">'.$t.'</a>
+                <a href="'.static::$f3->get("SITE_DOMAIN").$link.'">'.$t.'</a>
             </div>';
         }
 
         /**
          * <p>Возвращает оболочку с текстом ошибки для вывода на стороне клиента</p>
          * @param string $err_txt
-         * @return [type]
+         * @return string
          */
         protected function _GetErrWrap($err_txt)
         {

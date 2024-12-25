@@ -139,7 +139,7 @@ class Tests{
         INNER JOIN variant v ON v.id=v_q.variant_id
         WHERE v.link=?";
         $quest_data['questions']=static::$db->exec($q,[$variant_link]);
-        $quest_data['variant']=$this->GetTestVariant($variant_link);
+        $quest_data['variant']=$this->GetVariant($variant_link);
         
         foreach ($quest_data['questions'] as $v) 
         {
@@ -157,10 +157,18 @@ class Tests{
     */
     public function GetUserTests($user_id,$where=''){
         return static::$db->exec("SELECT 
-            id,title,start,\"end\"
-            FROM test
+            t.id,title,start,\"end\"
+            FROM test t
             WHERE s_a_id=? ".($where!=''?"AND($where)":''),
             [$user_id]
+        );
+    }
+    public function GetAllUserTests($where=''){
+        return static::$db->exec("SELECT 
+            t.id,title,start,\"end\",s.name as author_name
+            FROM test t
+            INNER JOIN s_a s ON s.id=t.s_a_id
+            ".($where!=''?"WHERE $where":'')
         );
     }
     public function GetUserTest($variant_link){
@@ -183,7 +191,7 @@ class Tests{
         ",[$variant_link]);
     }
 
-    public function GetTestVariant($variant_link){
+    public function GetVariant($variant_link){
         return static::$db->exec("SELECT v.*
         FROM variant v
         WHERE v.link='$variant_link'
@@ -200,7 +208,7 @@ class Tests{
      * <p>Создает вопросы для варианта</p>
     */
     public function saveQuestions($q_data,$variant_link) {
-        $vid=$this->GetTestVariant($variant_link)['id'];
+        $vid=$this->GetVariant($variant_link)['id'];
         $q="SELECT MAX(id) as max_id FROM question";
         $cur_qst_id=intval(static::$db->exec($q)[0]['max_id'])+1;
 

@@ -116,7 +116,7 @@ CREATE TABLE public.result (
     id integer NOT NULL,
     s_a_id integer NOT NULL,
     variant_id integer NOT NULL,
-    date timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    date timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     status boolean DEFAULT false NOT NULL,
     sum integer DEFAULT 0 NOT NULL
 );
@@ -231,8 +231,8 @@ CREATE TABLE public.test (
     title character varying NOT NULL,
     description character varying NOT NULL,
     "limit" smallint NOT NULL,
-    start timestamp with time zone NOT NULL,
-    "end" timestamp with time zone NOT NULL
+    start timestamp without time zone NOT NULL,
+    "end" timestamp without time zone NOT NULL
 );
 
 
@@ -362,6 +362,43 @@ ALTER TABLE ONLY public.variant ALTER COLUMN id SET DEFAULT nextval('public.vari
 --
 
 COPY public.answer (id, question_id, text, price, fine) FROM stdin;
+1	1	Э. Тайлор	1	0
+2	1	А. Радклифф-Браун	-1	0
+3	1	Л. Уайт	-1	0
+4	2	специфическими приемами исследования	-1	0
+5	2	особенностью класса изучаемых явлений	-1	0
+6	2	контекстом, в который помещаются явления при изучении	1	0
+7	3	в XIX	-1	0
+8	3	в XVIII	-1	0
+9	3	в XX	1	0
+10	4	Социология К. Маркса	-1	0
+11	4	Социология культуры Г. Зиммеля	-1	0
+12	4	Критическая теория Т. Адорно	1	0
+13	5	Г. Зиммель	1	0
+14	5	К. Манхейм	-1	0
+15	5	К. Маркс	-1	0
+16	6	рассмотрением лишь практического аспекта культуры	-1	0
+17	6	объяснением явлений культуры принципами социальной жизни	1	0
+18	6	отождествлением культуры и общества	-1	0
+19	7	Символ есть разновидность знаков	1	0
+20	7	Являются независимыми разновидностями язык	-1	0
+21	7	Слова &laquo;символ&raquo; и &laquo;знак&raquo; выражают одно и то же	-1	0
+22	8	Р. Барт	-1	0
+23	8	Ю. Лотман	1	0
+24	8	Ф. де Соссюр	-1	0
+25	9	является случаем мирового культурного процесса	-1	0
+26	9	сама является интерпретативной системой	1	0
+27	9	делится на материальную и духовную	-1	0
+28	10	самообучение и самосовершенствование	1	-1
+29	11	Ничего из перечисленного	-5	0
+30	11	Путешествия	1	0
+31	11	Онлайн обучение	1	0
+32	11	Общение с экспертами	1	0
+33	11	Чтение литературы	1	0
+34	11	Игра в видеоигру	10	0
+35	12	Да	1	0
+36	12	Нет	1	0
+37	12	Не могу ответить	0	0
 \.
 
 
@@ -370,6 +407,18 @@ COPY public.answer (id, question_id, text, price, fine) FROM stdin;
 --
 
 COPY public.question (id, title, text, is_open, is_vid_hidden) FROM stdin;
+1	Вопрос	Кто предложил первое антропологическое определение культуры	f	f
+2	Вопрос	По мнению Л. Уайта культурология отличается от других наук	f	f
+3	Вопрос	В каком веке культурология возникает как самостоятельная область знания?	f	f
+4	Вопрос	В какой концепции впервые дается описание капиталистического и классового характера современной культуры?	f	f
+5	Вопрос	Кто из социологов стал пионером в исследовании массовой культуры?	f	f
+6	Вопрос	Социологическое изучение культуры отличается:	f	f
+7	Вопрос	Как соотносятся символ и знак?	f	f
+8	Вопрос	Концепцию &laquo;эволюции&raquo; и &laquo;взрыва&raquo; как основных динамических процессов в семиотических системах культуры представил	f	f
+9	Вопрос	Культура как символическая система	f	f
+10	Продолжите фразу	Саморазвитие - это непрерывное	t	f
+11	Выберете все позиции	В которых обозначены подходы к самообразованию	f	f
+12	Оценка	Вы удовлетворены тестом?	f	f
 \.
 
 
@@ -378,6 +427,7 @@ COPY public.question (id, title, text, is_open, is_vid_hidden) FROM stdin;
 --
 
 COPY public.question_file (q_id, file_name, mime) FROM stdin;
+12	photo_2024-12-21_14-11-04.jpg	image
 \.
 
 
@@ -386,6 +436,8 @@ COPY public.question_file (q_id, file_name, mime) FROM stdin;
 --
 
 COPY public.result (id, s_a_id, variant_id, date, status, sum) FROM stdin;
+4	1	4	2024-12-25 11:29:36	t	3
+5	1	4	2024-12-25 20:16:35	f	-6
 \.
 
 
@@ -400,7 +452,10 @@ COPY public.s_a (id, login, pass, name, access, created) FROM stdin;
 4	testp@test	098f6bcd4621d373cade4e832627b4f6	Петров	1	2024-07-11
 5	tests@test	098f6bcd4621d373cade4e832627b4f6	Сидоров	1	2024-07-11
 6	test_manager@test	098f6bcd4621d373cade4e832627b4f6	Менеджер	3	2024-11-17
-7	testdad@test	098f6bcd4621d373cade4e832627b4f6	dad	1	2024-12-15
+8	testnm@test	098f6bcd4621d373cade4e832627b4f6	Новый Менеджер	3	2024-12-25
+9	test@test.test	098f6bcd4621d373cade4e832627b4f6	test	1	2024-12-25
+10	test1@test.test	098f6bcd4621d373cade4e832627b4f6	test1	1	2024-12-25
+11	fykakoi@yandex.ru	02c425157ecd32f259548b33402ff6d3	Диана	1	2024-12-25
 \.
 
 
@@ -409,6 +464,15 @@ COPY public.s_a (id, login, pass, name, access, created) FROM stdin;
 --
 
 COPY public.saved_answer (id, res_id, question_id, answer_id, descriptor) FROM stdin;
+7	4	10	28	самосовершенствование
+8	4	11	30	\N
+9	4	11	31	\N
+10	4	11	32	\N
+11	4	11	33	\N
+12	4	12	37	\N
+13	5	10	28	верно
+14	5	11	29	\N
+15	5	12	37	\N
 \.
 
 
@@ -417,7 +481,8 @@ COPY public.saved_answer (id, res_id, question_id, answer_id, descriptor) FROM s
 --
 
 COPY public.test (id, s_a_id, title, description, "limit", start, "end") FROM stdin;
-1	1	delete	this	1	2024-12-18 16:32:00+03	2024-12-25 16:32:00+03
+1	1	Тестирование по теме 1: 'Возникновение науки о культуре'	Необходимо ответить верно на 3 вопроса	3	2024-12-25 09:43:00	2025-01-01 09:43:00
+2	1	Тестирование на тему Саморазвитие	Вам необходимо правильно ответить на 2 из 3 вопросов	1	2024-12-25 11:23:00	2025-01-01 11:23:00
 \.
 
 
@@ -426,6 +491,10 @@ COPY public.test (id, s_a_id, title, description, "limit", start, "end") FROM st
 --
 
 COPY public.variant (id, test_id, title, link) FROM stdin;
+1	1	Вариант 1	06cdbca6092d611158b330226eb019b0
+2	1	Вариант 2	7109209f311a45ef23d710fc18b47572
+3	1	Вариант 3	2c0a09b8678b3b16abae902e2b7cb927
+4	2	Вариант 1	b3971dec69f2319cd8a98d4397b3a116
 \.
 
 
@@ -434,6 +503,18 @@ COPY public.variant (id, test_id, title, link) FROM stdin;
 --
 
 COPY public.variant_question (variant_id, question_id) FROM stdin;
+1	1
+1	2
+1	3
+2	4
+2	5
+2	6
+3	7
+3	8
+3	9
+4	10
+4	11
+4	12
 \.
 
 
@@ -455,21 +536,21 @@ SELECT pg_catalog.setval('public.question_id_seq', 1, false);
 -- Name: result_id_seq; Type: SEQUENCE SET; Schema: public; Owner: db_course
 --
 
-SELECT pg_catalog.setval('public.result_id_seq', 1, false);
+SELECT pg_catalog.setval('public.result_id_seq', 5, true);
 
 
 --
 -- Name: s_a_id_seq; Type: SEQUENCE SET; Schema: public; Owner: db_course
 --
 
-SELECT pg_catalog.setval('public.s_a_id_seq', 7, true);
+SELECT pg_catalog.setval('public.s_a_id_seq', 11, true);
 
 
 --
 -- Name: saved_answer_id_seq; Type: SEQUENCE SET; Schema: public; Owner: db_course
 --
 
-SELECT pg_catalog.setval('public.saved_answer_id_seq', 1, false);
+SELECT pg_catalog.setval('public.saved_answer_id_seq', 15, true);
 
 
 --
@@ -575,11 +656,11 @@ ALTER TABLE ONLY public.saved_answer
 
 
 --
--- Name: variant_question q_tq; Type: FK CONSTRAINT; Schema: public; Owner: db_course
+-- Name: variant_question q_vq; Type: FK CONSTRAINT; Schema: public; Owner: db_course
 --
 
 ALTER TABLE ONLY public.variant_question
-    ADD CONSTRAINT q_tq FOREIGN KEY (question_id) REFERENCES public.question(id) ON UPDATE CASCADE ON DELETE SET NULL;
+    ADD CONSTRAINT q_vq FOREIGN KEY (question_id) REFERENCES public.question(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

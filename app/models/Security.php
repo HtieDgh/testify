@@ -6,7 +6,7 @@ class Security
 	 * @return string login_error текст ошибки в случае провала авторизации
 	 */
 	public static function loginTest($f3,$db)
-{
+	{
 		$login_error='';
 		// Извлекается логин и пароль из переданных данных предварительно отфильтровывая лишие символы если они есть
 		$f3->set("POST",CFuns::sanitizeString($f3->get("POST")));
@@ -113,6 +113,50 @@ class Security
 		setcookie('test_link', '', 1, "/", $_SERVER['HTTP_HOST']);
 	}
 
-
+   /**
+     * <p>Получение данных учетных записей пользователя</p>
+     * @param string where - результат работы функции GetWhere
+     * @see Tests::GetWhere
+    */
+    public static function GetAllUsers($db,$where=''){
+        return $db->exec("SELECT *
+        FROM s_a
+        ".($where!=''?"WHERE $where":'')            
+        );
+    }
+    public static function GetUser($db,$user_id){
+        return $db->exec("SELECT * FROM s_a WHERE id=$user_id")[0];
+    }
+    public static function GetUser_login($db,$user_login){
+        return $db->exec("SELECT * FROM s_a WHERE login=?",[$user_login]);
+    }
+    /**
+     * <p>
+     * Сохраняет пользователя в системе на странице регистрации
+     * ed_type 1 $params=array($login,$pass,$acs,$name,$status,$creat,$user_id);
+     * ed_type 0 $params=array($login,$pass,$acs,$name,$status,$creat);
+     * </p>
+     * @return bool true если получилось сохранить
+    */
+    public static function SaveUser($db,$ed_type,$params){
+        switch($ed_type){
+            case '1':
+                $q="UPDATE s_a SET login = ?, pass = ?,access=?,name=?,created=? WHERE s_a.id = ?";
+                $scs_msg='Пользователь изменен!';
+                break;
+            case '0':
+                $q="INSERT INTO s_a (login, pass, access,name, created) VALUES (?, ?, ?, ?, ?)";
+                $scs_msg='Пользователь добавлен!';
+                break;
+            default:
+                return false;
+                break;
+        }
+        $db->exec($q,$params);
+        return true;
+    }
+	public static function deleteUser($db,$user_id){
+		$db->exec("DELETE FROM s_a WHERE id=?",[$user_id]);
+	}
 }
 ?>

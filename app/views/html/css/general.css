@@ -17,6 +17,9 @@ body{
 .mr_t_10{
     margin-top:10px ;
 }
+.mr_b_10{
+    margin-bottom:10px ;
+}
 .transparent{
     opacity: 0;
 }

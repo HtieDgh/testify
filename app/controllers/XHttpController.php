@@ -120,12 +120,13 @@ class XHttpController
             exit;
         }
         $t=new Tests($db);
-        if($params['variant_link']!=='0' && !$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id'))){
-            
-            $return_out['err']=TRUE;
-            $return_out['err_txt'].='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию или закройте данное окно и попробуйте создать свой тест.';
-            echo json_encode($return_out);
-            exit;
+        if( !$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id'))){
+            if($f3->get('user.access')!=3){
+                $return_out['err']=TRUE;
+                $return_out['err_txt'].='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию или закройте данное окно и попробуйте создать свой тест.';
+                echo json_encode($return_out);
+                exit;
+            }
         }
         
         $_POST=CFuns::sanitizeString($_POST);
@@ -194,10 +195,12 @@ class XHttpController
 
             if( !$t->CheckTestAuthor_tid($params['test_id'],$f3->get('user.id')) )
             {
-                $return_out['err']=TRUE;
-                $return_out['err_txt']='Пользователь не авторизован для данной операции удаления';
-                echo json_encode($return_out);
-                exit;
+                if($f3->get('user.access')!=3){
+                    $return_out['err']=TRUE;
+                    $return_out['err_txt']='Пользователь не авторизован для данной операции удаления';
+                    echo json_encode($return_out);
+                    exit;
+                }
             }
             $variants=$t->GetAllTestVariants_tid($params['test_id']);
             foreach ($variants as $v) {
@@ -240,10 +243,12 @@ class XHttpController
 
             if( !$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id')) )
             {
-                $return_out['err']=TRUE;
-                $return_out['err_txt']='Пользователь не авторизован для данной операции удаления';
-                echo json_encode($return_out);
-                exit;
+                if($f3->get('user.access')!=3){
+                    $return_out['err']=TRUE;
+                    $return_out['err_txt']='Пользователь не авторизован для данной операции удаления';
+                    echo json_encode($return_out);
+                    exit;
+                }
             }
 
             //Удаление файлов варианта теста
@@ -270,7 +275,7 @@ class XHttpController
             echo json_encode($return_out);
             exit;
         }
-        if(preg_match("/[^0-9a-z_]/",$params['variant_link']))
+        if(preg_match("/[^0-9a-z]/",$params['variant_link']))
         {
             
             $return_out['err']=TRUE;
@@ -288,11 +293,12 @@ class XHttpController
         }
         $t=new Tests($db);
         if(!$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id'))){
-            
-            $return_out['err']=TRUE;
-            $return_out['err_txt']='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию.';
-            echo json_encode($return_out);
-            exit;
+            if($f3->get('user.access')!=3){
+                $return_out['err']=TRUE;
+                $return_out['err_txt']='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию.';
+                echo json_encode($return_out);
+                exit;
+            }
         }
         $_POST=CFuns::sanitizeString($_POST);
         $json_str=htmlspecialchars_decode(htmlspecialchars_decode($_POST['question_data']));
@@ -325,7 +331,7 @@ class XHttpController
         
         if( $upl->UploadJSONTestData(json_encode([
             'test'=>$test_struct,
-            'variant'=>$t->GetTestVariant($params['variant_link']),
+            'variant'=>$t->GetVariant($params['variant_link']),
             'qsts'=>$q_data
         ]), $params['variant_link']) !== FALSE )
         {
@@ -366,11 +372,12 @@ class XHttpController
         }
         $t=new Tests($db);
         if(!$t->CheckTestAuthor_tid($params['test_id'],$f3->get('user.id'))){
-            
-            $return_out['err']=TRUE;
-            $return_out['err_txt']='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию.';
-            echo json_encode($return_out);
-            exit;
+            if($f3->get('user.access')!=3){
+                $return_out['err']=TRUE;
+                $return_out['err_txt']='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию.';
+                echo json_encode($return_out);
+                exit;
+            }
         }
         $return_out['variants']=$t->GetAllTestVariants_tid($params['test_id']);
         $return_out['absolute']=$f3->get('SITE_DOMAIN');
