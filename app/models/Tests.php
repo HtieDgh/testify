@@ -546,8 +546,8 @@ class Tests{
         r.status,
         r.date
         FROM test t
-        INNER JOIN result r ON r.variant_id=t.id
         INNER JOIN variant v ON v.test_id=t.id
+        INNER JOIN result r ON r.variant_id=v.id
         WHERE r.s_a_id=$user_id AND r.date =(
             SELECT 
             _r.date

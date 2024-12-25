@@ -69,7 +69,7 @@ class HttpController
 					);
 					break;
 				case 3: // Роль Менеджер
-					$view_data['s_aut'] = 'Поиск по всем созданым тестам';//TODO
+					$view_data['s_ut'] = 'Поиск по всем созданым тестам';//TODO
 					break;
 				default:
 					# TODO
@@ -204,8 +204,18 @@ class HttpController
 		$t=new Tests($db);
 		//Получение данных о вопросах/варианте/тесте
 		 $test_data=$t->GetFullUserTest($params["variant_link"]);
+		//Проверка периода действия теста
+		$curDate=time();
+		
+		 if($curDate<strtotime($test_data['test']['start'])){
+			$f3->reroute("/".'Данный тест недоступен для прохождения, начало тестирования: '.$test_data['test']['start']);
+		 }
+		 if($curDate>=strtotime($test_data['test']['end'])){
+			$f3->reroute("/".'Прохождение невозможно, тестирование закончено: '.$test_data['test']['end']);
+		 }
 		//Для ссылки на файлы теста необходим логин пользователя создавшего тест
 		 $author_login=$t->GetAuthorLogin($test_data['test']['id']);
+
 
 		$v=new Views($f3);
 		echo $v->Htmlrender(
@@ -281,7 +291,7 @@ class HttpController
 		}
 		$res_data=null;
 		$visual_data['s_rslts']='Поиск по результатам';
-		$visual_data['s_cancel_btn']='';
+		$visual_data['s_cancel']='';
 		//Только Менеджер или Создатель теста может смотреть статистику по конкретному тесту
 		$t=new Tests($db);
 
@@ -308,7 +318,7 @@ class HttpController
 			]  );
 
 		if($search!==''){
-			$visual_data['s_cancel_btn']='<a href="'.$f3->get("SITE_DOMAIN").'statistics/'.$params['test_id'].'">Отменить поиск</a>';
+			$visual_data['s_cancel']='<a href="'.$f3->get("SITE_DOMAIN").'statistics/'.$params['test_id'].'">Отменить поиск</a>';
 		}
 		
 		//Вывод статистики

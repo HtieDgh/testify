@@ -54,7 +54,7 @@ $(document).ready(function(){
                 </div>
                     
                     
-                    <textarea rows="1" class="title mr_r_10" name="0_id_var" placeholder="Название Варианта" value="" required></textarea>
+                    <textarea rows="1" class="title mr_r_10" name="0_id_var" placeholder="Название Варианта" value="Вариант `+v_count+`" required>Вариант `+v_count+`</textarea>
                     
                     <a title="Удалить вариант теста" class="qst_btn_alt del_answ_btn" href="./../../delete/variant/0"><img alt="Удалить вариант теста" src="minus_test.svg"></a>
 
@@ -86,6 +86,7 @@ $(document).ready(function(){
                         if(msg['err']){ 
                             alert(msg['err_txt']);
                         }
+                        $('#v_countjs').val($('#v_countjs').val()-1);
                     });
                 }
                 

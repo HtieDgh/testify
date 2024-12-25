@@ -171,11 +171,21 @@ $(document).ready(function(){
         });
     }
     //==== Добавление вопроса в список ==== 
+    function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1) + min); // Максимум и минимум включаются
+    }
     // Одиночный клик - Новый вопрос
     $('#add_qst_btn').click(function(e){
         e.preventDefault();
+        let rnd=0;
+        while ($('#'+rnd+'_q').length!=0) {
+            rnd=getRandomInt(1,65536);
+        }
+        
         $(this).before(
-            `<div id="`+all_qst_count+`_q" class="questionjs note transparent">
+            `<div id="`+rnd+`_q" class="questionjs note transparent">
             <div class="flex_sb_r">
                 <form class="decor" method="post" action="new_test/">
                     <div class="form-inner">
@@ -184,13 +194,13 @@ $(document).ready(function(){
                         <div class="flex_sb_r flex_wr">
                             <div class="qst_type flex_sb_r_ac">
                                 <div class="flex_fs_r_ac">
-                                    <input  class="mr_r_10" type="radio" id="`+all_qst_count+`_type" name="type" value="0" checked />
-                                    <label for="`+all_qst_count+`_type">Закрытый</label>
+                                    <input  class="mr_r_10" type="radio" id="`+rnd+`_type" name="type" value="0" checked />
+                                    <label for="`+rnd+`_type">Закрытый</label>
                                 </div>
     
                                 <div class="flex_fs_r_ac">
-                                    <input class="mr_r_10" type="radio" id="`+all_qst_count+`_2_type" name="type" value="1" />
-                                    <label for="`+all_qst_count+`_2_type">Открытый</label>
+                                    <input class="mr_r_10" type="radio" id="`+rnd+`_2_type" name="type" value="1" />
+                                    <label for="`+rnd+`_2_type">Открытый</label>
                                 </div>
                             </div>
                             
@@ -198,38 +208,39 @@ $(document).ready(function(){
     
                         <textarea name="note_txt" class="edit_txt qst_txt" placeholder="Текст вопроса" rows="4" required></textarea>
                         <div class="flex_sb_r_ac flex_wr">
-                            <input class="fileinjs UserIn" id="`+all_qst_count+`_files" accept="image/*,video/*,audio/*" name="user_files[]" type="file" multiple>
+                            <input class="fileinjs UserIn" id="`+rnd+`_files" accept="image/*,video/*,audio/*" name="user_files[]" type="file" multiple>
                             <div class="flex_fs_r_ac">
-                                <input class="mr_r_10" type="checkbox" name="is_vid_hidden" id="`+all_qst_count+`_is_vid_hidden">
-                                <label for="`+all_qst_count+`_is_vid_hidden">Скрыть видео?</label>
+                                <input class="mr_r_10" type="checkbox" name="is_vid_hidden" id="`+rnd+`_is_vid_hidden">
+                                <label for="`+rnd+`_is_vid_hidden">Скрыть видео?</label>
                             </div>
                         </div>
                             
                         <div class="mt_10">
                             <p class="ac_txt">Варианты ответов:</p>
-                            <input id="`+all_qst_count+`_answ_count" type="hidden" name="answ_count" value="1">
-                            <hr id="`+all_qst_count+`_answ_list">
+                            <input id="`+rnd+`_answ_count" type="hidden" name="answ_count" value="1">
+                            <hr id="`+rnd+`_answ_list">
                             <div class="qstanswjs flex_fs_r_ac">
+                            <input type="hidden" name="answidjs" class="answidjs" value="0">
                             
                                 <span class="fs14_txt answ_number mr_r_10">1</span>
-                                <textarea rows="1" class=" mr_r_10" name="`+all_qst_count+`_0_qst_answ" placeholder="Текст ответа" value="" required></textarea>
+                                <textarea rows="1" class=" mr_r_10" name="`+rnd+`_0_qst_answ" placeholder="Текст ответа" value="" required></textarea>
                                 
                                 <input type="number" name="price" min="-1000" max="1000" value="0">
                                 <input type="number" class="fine_input" name="fine" min="-1000" max="1000" value="0">
-                                <a title="Удалить вариант ответа" class="qst_btn_alt del_answ_btn" href="`+all_qst_count+`"><img alt="Удалить вариант ответа" src="minus_test.svg"></a>
+                                <a title="Удалить вариант ответа" class="qst_btn_alt del_answ_btn" href="`+rnd+`"><img alt="Удалить вариант ответа" src="minus_test.svg"></a>
                             
                             </div>
-                            <a title="Добавить вариант ответа" class="qst_btn add_answ_btn" href="`+all_qst_count+`"><img alt="Добавить вариант ответа" src="add_test.svg"></a>
+                            <a title="Добавить вариант ответа" class="qst_btn add_answ_btn" href="`+rnd+`"><img alt="Добавить вариант ответа" src="add_test.svg"></a>
                         </div>
                         
                     </div>
                 </form>
                 <div class="flex_fs_c_ac">
                     <div class="qst_number ac_txt fs12_txt">
-                        <span class="cur_all_qsts">`+(all_qst_count+1)+`</span>/<span class="all_qsts">`+(all_qst_count+1)+`</span>
+                        <span class="cur_all_qsts">`+(all_qst_count+1)+`</span>/<span class="all_qsts"></span>
                     </div>
                     
-                    <a title="Удалить вопрос из теста" class="qst_btn_alt del_qst_btn" href="`+all_qst_count+`">
+                    <a title="Удалить вопрос из теста" class="qst_btn_alt del_qst_btn" href="`+rnd+`">
                         <div class="flex_c_c">
                             <img alt="Удалить вопрос из теста" src="minus_test.svg">
                         </div>
@@ -240,7 +251,7 @@ $(document).ready(function(){
             </div>
             </div>`);
         //Плавное появление
-        $('#'+all_qst_count+'_q').animate({opacity:1},300);
+        $('#'+rnd+'_q').animate({opacity:1},300);
         //Прибавка +1 к номеру для отображения
         all_qst_count++;
         $('.all_qsts').html(all_qst_count);
@@ -296,7 +307,7 @@ $(document).ready(function(){
                     //Включение question_data в форму отправки
                    fd2.append('question_data',JSON.stringify(getQuestionData()));
                    //Отправка запроса
-                   $.ajax({
+                  $.ajax({
                        url: '../../edit/questions/'+$('#variant_link').val(),
                        data: fd2,
                        cache: false,
@@ -308,7 +319,7 @@ $(document).ready(function(){
                        error: ()=>{
                         $('#confirm_edit_btn').html('Следующий шаг');
                        }
-                   });
+                   }); 
                    
                 }
     
