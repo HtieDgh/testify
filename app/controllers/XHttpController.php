@@ -121,7 +121,7 @@ class XHttpController
         }
         $t=new Tests($db);
         if( !$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id'))){
-            if($f3->get('user.access')!=3){
+            if($f3->get('user.access')<2){
                 $return_out['err']=TRUE;
                 $return_out['err_txt'].='Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию или закройте данное окно и попробуйте создать свой тест.';
                 echo json_encode($return_out);
@@ -393,7 +393,7 @@ class XHttpController
         $return_out['err']=FALSE;
         $return_out['err_txt']='';
         $log_err_txt=Security::loginTest($f3,$db);
-        if( $f3->get('user.access')<=1 )
+        if( $f3->get('user.access')<1 )
         {
             $return_out['err']=TRUE;
             $return_out['err_txt']=$log_err_txt;

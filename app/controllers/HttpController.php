@@ -433,7 +433,7 @@ class HttpController
 		echo $v->Htmlrender(
 			'Решистрация - Testify',
 			$v->BodyMainPage(
-			$v->Header(),
+			$v->Header(TRUE),
 			[$v->Accounts(
 				$view_data,
 				$users,

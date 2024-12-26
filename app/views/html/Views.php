@@ -102,7 +102,7 @@
                 '.($is_auth?
                 
                 '<div class="mr">
-                     <a href="exit/">Выйти</a>
+                     <a href="'.static::$f3->get("SITE_DOMAIN").'exit/">Выйти</a>
                  </div>'
                  :
                  ''
@@ -118,7 +118,7 @@
             <div class="ClearFix">
                 <footer>
                     <div class=" flex_sb_r_ac">
-                        <div class="contacts"><a href="#">Руководство</a></div>
+                        <div class="contacts"><a href="'.static::$f3->get("SITE_DOMAIN").static::$f3->get("user_guide_path").'" target="_blank">Руководство</a></div>
                         <div><p>Система дистанционного тестирования Testify.</p></div>
                         <div class="contacts">&copy; 2024</div>
                     </div>
@@ -1078,7 +1078,7 @@
                 </div>
                 <div class="note">
                     <p class="good_txt italyc">Управление пользователями:</p><br>
-                    <br><br>
+                    
                     <p>Все пользователи: id | логин | пароль | имя | доступ | дата регистрации</p><br>
                     '.$this->_getUserTable($users).'
                 </div>
