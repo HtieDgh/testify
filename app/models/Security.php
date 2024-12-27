@@ -15,17 +15,20 @@ class Security
 		$f3->mset(
 			array(
 				"user.login"=> $f3->get("POST.login") !== NULL ? $f3->get("POST.login") : ( $f3->get("COOKIE.security_login") !== NULL ? $f3->get("COOKIE.security_login") : ''),
-				"user.password"=> $f3->get("POST.password")!==NULL  ?  md5($f3->get("POST.password")) : ( $f3->get("COOKIE.security_password")!==NULL ? $f3->get("COOKIE.security_password") : ''),
+				"user.password"=> $f3->get("POST.password")!==NULL  ? ,md5( $f3->get("POST.password") )  : ( $f3->get("COOKIE.security_password")!==NULL ? $f3->get("COOKIE.security_password") : ''),
 				"user.id"=>0,
 				"user.access"=>-1
 			)
 		);
-		
+
 		// Если заданы логин и пароль, проверяется их актуальность
 		if( $f3->get("user.login")!=='' && $f3->get("user.password")!=='' )
 		{
-			$query="SELECT s.id,s.access,s.name FROM s_a as s WHERE  s.login='".preg_replace("/[^a-zA-Z0-9_@.]/","",$f3->get("user.login"))."' AND  s.pass='".$f3->get("user.password")."'";
-			$result=$db->exec($query);
+			$query="SELECT s.id,s.access,s.name FROM s_a as s WHERE  s.login=? AND  s.pass=?";
+			$result=$db->exec($query,[
+				preg_replace("/[^a-zA-Z0-9_@.]/","",$f3->get("user.login")),
+				$f3->get("user.password")
+			]);
 
 			// Если пользователь с такими данными найден
 			if (count($result)>0)

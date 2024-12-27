@@ -11,13 +11,19 @@ class XHttpController
         isset($_POST['password'])&&
         isset($_POST['login'])
         ){
-            //подготовка данных перед внесением в бд
-            $_POST=CFuns::sanitizeString($_POST);
-            $login=$_POST['login'];
-            $pass=md5($_POST['password']);
-            $name=$_POST['name'];
-            // Регистрация пользователя
-            $return_out=Security::registUser($db,$login,$pass,$name);
+            if($_POST['password']!=''){
+                //подготовка данных перед внесением в бд
+                $_POST=CFuns::sanitizeString($_POST);
+                $login=$_POST['login'];
+                $pass=md5($_POST['password']);
+                $name=$_POST['name'];
+                // Регистрация пользователя
+                $return_out=Security::registUser($db,$login,$pass,$name);
+            }else{
+                $return_out['err']=TRUE;
+                $return_out['err_txt']='Заполниете все поля формы';
+            }
+
         } else {
             //Редкая ситуация когда, из-за ошибки передачи, не все данные дошли до сервера
             $return_out['err']=TRUE;
