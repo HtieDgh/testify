@@ -15,7 +15,7 @@ class Security
 		$f3->mset(
 			array(
 				"user.login"=> $f3->get("POST.login") !== NULL ? $f3->get("POST.login") : ( $f3->get("COOKIE.security_login") !== NULL ? $f3->get("COOKIE.security_login") : ''),
-				"user.password"=> $f3->get("POST.password")!==NULL  ? ,md5( $f3->get("POST.password") )  : ( $f3->get("COOKIE.security_password")!==NULL ? $f3->get("COOKIE.security_password") : ''),
+				"user.password"=> $f3->get("POST.password")!==NULL  ? md5( $f3->get("POST.password") )  : ( $f3->get("COOKIE.security_password")!==NULL ? $f3->get("COOKIE.security_password") : ''),
 				"user.id"=>0,
 				"user.access"=>-1
 			)
