@@ -118,7 +118,7 @@ class HttpController
 						$test_data=$t->GetUserTest($params["variant_link"])[0];
 						
 						if (count($test_data) == 0) {
-							$f3->reroute("/".urlencode('Ошибка: Данных теста не найдено'));
+							$f3->reroute("/".urlencode('Ошибка Данных теста не найдено'));
 						}
 						$vd=$t->GetAllTestVariants($params["variant_link"]);
 					}else{
@@ -161,7 +161,7 @@ class HttpController
 		// Пользователь найден
 		if(preg_match("/[^0-9a-z]/",$params["variant_link"]) || $params["variant_link"]=='0')
 		{
-			$f3->reroute("/".'Произошла ошибка при получении данных теста. Повторите операцию или создайте новый тест');
+			$f3->reroute("/".urlencode('Произошла ошибка при получении данных теста. Повторите операцию или создайте новый тест'));
 		}
 		$err_txt='';
 		//variant_link чист и готов к обработке
@@ -190,11 +190,11 @@ class HttpController
 		Security::loginTest($f3,$db);
         if( $f3->get('user.access')==-1 )
         {
-           $f3->reroute('/','Прежде чем проходить тест вам необходимо войти');
+           $f3->reroute('/',urlencode('Прежде чем проходить тест вам необходимо войти'));
         }
 		if(preg_match("/[^0-9a-z]/",$params["variant_link"]) || $params["variant_link"]=='0')
 		{
-			$f3->reroute("/".'Произошла ошибка при получении данных теста. Повторите операцию или откройте другой вариант');
+			$f3->reroute("/".urlencode('Произошла ошибка при получении данных теста. Повторите операцию или откройте другой вариант'));
 		}
 
 		$t=new Tests($db);
@@ -204,10 +204,10 @@ class HttpController
 		$curDate=time();
 		
 		 if($curDate<strtotime($test_data['test']['start'])){
-			$f3->reroute("/".'Данный тест недоступен для прохождения, начало тестирования: '.$test_data['test']['start']);
+			$f3->reroute("/".urlencode('Данный тест недоступен для прохождения, начало тестирования '));
 		 }
 		 if($curDate>=strtotime($test_data['test']['end'])){
-			$f3->reroute("/".'Прохождение невозможно, тестирование закончено: '.$test_data['test']['end']);
+			$f3->reroute("/".urlencode('Прохождение невозможно, тестирование закончено '));
 		 }
 		//Для ссылки на файлы теста необходим логин пользователя создавшего тест
 		 $author_login=$t->GetAuthorLogin($test_data['test']['id']);
@@ -283,7 +283,7 @@ class HttpController
 		// Пользователь найден
 		if(preg_match("/[^0-9]/",$params["test_id"]) || $params["test_id"]=='')
 		{
-			$f3->reroute("/".'Произошла ошибка при получении индентификатора теста. Повторите операцию');
+			$f3->reroute("/".urlencode('Произошла ошибка при получении индентификатора теста. Повторите операцию'));
 		}
 		$res_data=null;
 		$visual_data['s_rslts']='Поиск по результатам';
@@ -293,7 +293,7 @@ class HttpController
 
 		if(!$t->CheckTestAuthor_tid($params['test_id'],$f3->get('user.id')) ){
 			if($f3->get("user.access")!=3){
-				$f3->reroute("/".'Вы не авторизованы для выполнения данной операции');
+				$f3->reroute("/".urlencode('Вы не авторизованы для выполнения данной операции'));
 			}
         }
 		//Обработка поискового запроса
@@ -415,7 +415,7 @@ class HttpController
 				   }
 					break;
 				default:
-					$f3->reroute('/'.urlencode('Ошибка: передан неверно тип редактирования записи')) ;
+					$f3->reroute('/'.urlencode('Ошибка передан неверно тип редактирования записи')) ;
 					break;
 			}
 				
@@ -458,10 +458,10 @@ class HttpController
         $log_err_txt=Security::loginTest($f3,$db);
         if( $f3->get('user.access')!=3 )
         {
-            $f3->reroute('/'.urlencode('Недостаточно прав для удаления пользоватлея'));
+            $f3->reroute('/'.urlencode('Недостаточно прав для удаления пользователя'));
         }
 		if(preg_match("/[^0-9]/",$params["user_id"])){
-			$f3->reroute("/".urlencode('Произошла ошибка при получении индентификатора пользоватлея. Повторите операцию.'));
+			$f3->reroute("/".urlencode('Произошла ошибка при получении индентификатора пользователя. Повторите операцию.'));
 		}
 		Security::deleteUser($db,$params["user_id"]);
 		$f3->reroute("/edit/accounts");
