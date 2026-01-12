@@ -1,5 +1,5 @@
 <?php
-class XHttpController
+class XMainController
 {
     /**
      * <p>Регистрация новго пользователя</p>

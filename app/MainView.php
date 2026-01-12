@@ -1,7 +1,7 @@
 <?php
 /* public $html_dflt_title='Главная страница - Testify'; */
 //Файл заменяет Представление
-    class Views{
+    class MainView{
         public $html_head='';
         public static $f3;
         private $css=[];

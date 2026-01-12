@@ -159,18 +159,21 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-#Composer thirdparties
+#Composer third parties
 vendor/
 
-# virtual enviroment variables
+# virtual environment variables
 venv/
 
-# test user_data folder for user test saved files
-user_data/
 
 # tmp files of framework
 tmp/
 
 # development help files
-chlgsample.lnk
 db/make_generate_sql.bat
+
+design/
+.vscode/
+
+# dynamic user_data folder for user saved files
+user_data/

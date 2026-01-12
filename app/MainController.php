@@ -1,5 +1,5 @@
 <?php
-class HttpController
+class MainController
 {
 	/**
      * <p>Отображение Профиля пользователя;
@@ -11,7 +11,7 @@ class HttpController
 		$f3->copy("main_title","my_title");
 		
 		$logErrTxt=Security::loginTest($f3,$db);
-		$v=new Views($f3);
+		$v=new MainView($f3);
 		$err_txt = urldecode( isset($params["err_txt"])?$params["err_txt"]:'');
 		if($f3->get("user.id")===0){
 			//Отображение формы входа
@@ -130,7 +130,7 @@ class HttpController
 			}
 
 			// Отображение Редактора теста с данными если они были найдены
-			$v=new Views($f3);
+			$v=new MainView($f3);
 			echo $v->Htmlrender(
 				'Редактор - Testify',
 				$v->BodyMainPage(
@@ -170,7 +170,7 @@ class HttpController
 		$q_data=$t->getQuestionData($params["variant_link"]);
 
 		//формаирование разметки и возврат клиенту
-		$v=new Views($f3);
+		$v=new MainView($f3);
 		echo $v->Htmlrender(
 			'Редактор - Testify',
 			$v->BodyMainPage(
@@ -213,7 +213,7 @@ class HttpController
 		 $author_login=$t->GetAuthorLogin($test_data['test']['id']);
 
 
-		$v=new Views($f3);
+		$v=new MainView($f3);
 		echo $v->Htmlrender(
 			'Тестирование - Testify',
 			$v->BodyMainPage(
@@ -259,7 +259,7 @@ class HttpController
 		$t=new Tests($db);
 		$res_data=$t->GetUserTestResults($params["variant_link"],$f3->get('user.id'));
 
-		$v=new Views($f3);
+		$v=new MainView($f3);
 		echo $v->Htmlrender(
 			$res_data[0]['title'].': Результаты - Testify',
 			$v->BodyMainPage(
@@ -320,7 +320,7 @@ class HttpController
 		}
 		
 		//Вывод статистики
-		$v=new Views($f3);
+		$v=new MainView($f3);
 		echo $v->Htmlrender(
 			$res_data['test']['title'].': Статистика - Testify',
 			$v->BodyMainPage(
@@ -332,7 +332,7 @@ class HttpController
 	}
 	// Страница регистрации
 	public function registPage($f3,$params=NULL){
-		$v=new Views($f3);
+		$v=new MainView($f3);
 		echo $v->Htmlrender(
 			'Решистрация - Testify',
 			$v->BodyMainPage(
@@ -429,7 +429,7 @@ class HttpController
 			Tests::GetWhere( $s_ut, ["name","login","pass","access::text","id::text","created::text"] )
 		);
 
-		$v=new Views($f3);
+		$v=new MainView($f3);
 		echo $v->Htmlrender(
 			'Решистрация - Testify',
 			$v->BodyMainPage(
