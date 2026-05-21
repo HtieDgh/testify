@@ -1,0 +1,28 @@
+<main class="form-wrap flex_c_c">
+    <div class="ClearFix">
+        <form class="decor" method="post" action="{{ @BASE }}/email/">
+            <div class="form-left-decoration"></div>
+            <div class="form-right-decoration"></div>
+            <div class="circle"></div>
+            <div class="form-inner">
+                <h3>Написать нам</h3>
+                <input type="email" name="sender_email" required placeholder="Ваша почта">
+                <input type="text" name="sender_name" required placeholder="Ваше имя">
+                <input name="sender_subject" required type="text" placeholder="Тема сообщения">
+                <textarea name="sender_txt" required placeholder="Сообщение..." rows="10"></textarea>
+                <div class="flex_c_r"><input type="submit" value="Отправить"></div>
+                <check if="{{ @error==0}}">
+                    <p class="good_txt">Письмо отправлено! <a href="{{ @BASE }}">На главную</a></p>
+                </check>
+                <check if="{{@error==1}}">
+                    <p class="alert_txt"> Ошибка отправки:
+                        <p>{{ @msg }}</p> 
+                    <p> Попробуйте еще раз! <a href="{{ @BASE }}">На главную</a></p>
+                </check>
+                <check if="{{@error==2}}">
+                    <p class="alert_txt">Вставьте данные во все поля!!!</p>
+                </check>
+            </div>
+        </form>
+    </div>
+</main>

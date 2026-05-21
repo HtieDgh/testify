@@ -18,7 +18,7 @@
     }
   }
   .form-inner input,
-  .form-inner textarea,.insert_fl {
+  .form-inner textarea {
     display: block;
     box-sizing: border-box;
     width: 100%;
@@ -34,6 +34,9 @@
     border: 4px solid transparent;
     
   }
+  .wrap_block .form-inner{
+    padding: 0;
+  }
   .file_in{
 	  max-width: 350px;
   }
@@ -41,7 +44,7 @@
 	.form-inner input:focus,
 	.form-inner textarea:focus{
 		outline: none;
-		border: 4px solid var(--high-bg-color);
+		border: 4px solid var(--accent-color);
   }
     .form-inner input[type="number"]{
         width: 100px;

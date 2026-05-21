@@ -1,0 +1,26 @@
+/*Стили таблицы @see ./editor/accounts */
+.table{
+	border: 1px solid var(--high-bg-color);
+	table-layout: auto;
+	width: 100%;
+	margin-bottom: 20px;
+}
+.table th {
+	font-weight: bold;
+	padding: 5px;
+	background: #efefef;
+	border: 1px solid #dddddd;
+	vertical-align: middle;
+}
+.table td{
+	padding: 5px 10px;
+	border: 1px solid var(--high-bg-color);
+	text-align: left;
+	vertical-align: middle;
+}
+.table tbody tr:nth-child(odd){
+	background: var(--table-tr-odd-colo);
+}
+.table tbody tr:nth-child(even){
+	background: var(--table-tr-even-color);
+}

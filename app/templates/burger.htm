@@ -1,0 +1,20 @@
+<div class="nav_wrap">
+    <ul class="nav">
+        <check if="{{ @user.isAuth }}">
+            <true>
+                <li><a href="{{ @BASE }}/profile/">Профиль</a></li>
+                <li><a href="{{ @BASE }}/profile/tests">Тесты</a></li>
+                <check if="{{ @user.isAuthor}}"><li><a href="{{ @BASE }}/profile/courses">Курсы</a></li></check>
+                <check if="{{ @user.isAuthor || @user.isAdmin }}"><li><a href="{{ @BASE }}/profile/statistics">Статистика</a></li></check>
+                <li><a href="{{ @BASE }}/email/">Отправить письмо</a></li>
+                <li><a href="{{ @BASE }}/">Главная</a></li>
+                <li><a href="{{ @BASE }}/exit/">Выход</a></li>
+            </true>
+            <false>
+                <li><a href="{{ @BASE }}/login/">Войти</a></li>
+                <li><a href="{{ @BASE }}/email/">Отправить письмо</a></li>
+                <li><a href="{{ @BASE }}/">Главная</a></li>
+            </false>
+        </check>
+    </ul>	
+</div>

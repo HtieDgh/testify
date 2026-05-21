@@ -1,3 +1,72 @@
 #ex1 p{
     overflow: hidden;
 }
+
+/*Модальное окно*/
+.my_window{
+	display: none;
+	position: fixed;
+	right: 2%;
+	bottom: 2%;
+	background-color: #e4e4e4;
+	border: 5px solid rgb(124, 161, 43);
+	/*transform:translate(-50%,-50%);*/
+	-webkit-animation-name: animatetop;
+	-webkit-animation-duration: 0.4s;
+	animation-name: animatetop;
+	animation-duration: 0.4s;
+	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+	border-radius: 5px;
+}
+	.comment_txt_form{
+		align-items: stretch;
+		margin:10px 20px 0;
+		width: 400px;
+	}
+	.comment_textarea {
+		resize: none;
+		overflow: auto;
+		min-height: 1rem;
+		max-height: 100px;
+		}
+	@-webkit-keyframes animatetop {
+		from {bottom: -20%;; opacity:0} 
+		to {bottom: 2%;; opacity:1}
+	}
+
+	@keyframes animatetop {
+		from {bottom: -20%;; opacity:0} 
+		to {bottom: 2%;; opacity:1}
+	}
+	.close {
+		text-decoration: none;
+		z-index: 200;
+		display: block;
+		float: right;
+		clear: both;
+			color: black;
+			border-radius: 50%;
+			margin:0 6px 6px 0;
+			font-size: 30px;
+			text-align:right;
+			font-weight: bold;
+			line-height:100%;
+	}
+
+/*Кнопка поднять на верх*/	
+.mbtn{
+	position: fixed;
+	transition: all 0.5s;
+	left:2%;
+	bottom:2%;
+	display:none;
+	width:50px;
+	line-height:50px;
+	border-radius:25px;
+	color:var(--btn-txt-color);
+	background:var(--btn-bg-color);
+	text-align:center;
+	font-size:45px;
+	text-decoration:none;
+	z-index: 1000;
+}

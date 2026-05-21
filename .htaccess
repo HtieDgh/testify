@@ -1,3 +1,5 @@
+# отключение показа списка файлов директории если таковой был
+Options -Indexes
 # Enable rewrite engine and route requests to framework
 RewriteEngine On
 
@@ -6,33 +8,51 @@ RewriteEngine On
 # containing this .htaccess file
 #
 # RewriteBase /
-
+# Правила учитываются относительно корня той директории в которой хранится .htaccess: для ^..$:
+#  ./project-app/app/something.file
+#                ^                 ^ 
+#                начало строки!!!  конец строки!!!
 RewriteRule ^(tmp)\/|\.ini$ - [R=404]
 
 # changing rewrites of files
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*\.css)$ app/views/html/css/$1 [L,QSA]
+RewriteRule ^(.*\.css)$ app/static/css/$1 [L,QSA]
+
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteRule ^.*/([0-9a-z_]+\.css)$ app/static/css/$1 [L,QSA]
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^.*/([0-9a-z_]+\.css)$ app/views/html/css/$2 [L,QSA]
+RewriteRule ^.*((user_avas|course_avas)/[0-9a-z_]+(\.png|\.jpg|\.bmp))$ app/static/img/$1 [L,QSA]
+# пользовательские файлы
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^.*(user_data/[0-9a-z_\.]+)$ ./$1 [L,QSA]
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*\.png)$ app/views/html/img/$1 [L,QSA]
+RewriteRule ^(.*[\/0-9a-z_]+\.png)$ app/static/img/$1 [L,QSA]
+
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteRule ^([^/.]+\.svg)$ app/static/img/$1 [L,QSA]
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^.*/([0-9a-z_]+\.png)$ app/views/html/img/$1 [L,QSA]
+RewriteRule ^(.*[\/0-9a-z_]+\.svg)$ app/static/img/$1 [L,QSA]
+
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteRule ^([^/.]+\.ico)$ app/static/img/$1 [L,QSA]
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^([^/.]+\.svg)$ app/views/html/img/$1 [L,QSA]
+RewriteRule ^(.*[\/0-9a-z_]+\.ico)$ app/static/img/$1 [L,QSA]
+
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteRule ^(.*\.js)$ app/static/js/$1 [L,QSA]
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^.*/([0-9a-z_]+\.svg)$ app/views/html/img/$1 [L,QSA]
+RewriteRule ^(.*[\/0-9a-z_]+\.js)$ app/static/js/$1 [L,QSA]
+
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteRule ^(.*\.webmanifest)$ app/static/$1 [L,QSA]
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*\.js)$ app/views/html/js/$1 [L,QSA]
-
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^.*/([0-9a-z_]+\.js)$ app/views/html/js/$1 [L,QSA]
+RewriteRule ^(.*[\/0-9a-z_]+\.webmanifest)$ app/static/$1 [L,QSA]
 
 # changing rewrites of requests
 RewriteCond %{REQUEST_FILENAME} !-l

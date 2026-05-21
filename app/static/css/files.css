@@ -1,0 +1,32 @@
+.photos_block,.files_block,.video_block{
+	overflow-y:auto;
+	overflow-x:hidden ;
+}
+.files_block,.video_block,.photos_block{
+	max-height: 50vh;
+}
+.files_img{
+	max-width: 25%;
+}
+#photo_del,#file_del,#video_del{
+	visibility: hidden;
+}
+.exposed{
+	border: 5px solid #dd2929;
+	box-sizing: border-box;
+}
+
+.file_wrap{
+	margin-top:20px;
+}
+#open_full_img{
+	position: absolute;
+	top: 20px;
+	left:0;
+	z-index: 1002;
+	width: 100%;
+	transition: all 400ms;
+	border: 4px solid rgb(124, 161, 43);
+	box-sizing: border-box;
+	display: none;
+}

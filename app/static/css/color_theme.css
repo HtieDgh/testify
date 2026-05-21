@@ -1,26 +1,31 @@
 /*Цветовая гамма*/
 :root{
-    --main-bg-color: rgba(0, 28, 61, 0.08);
+    --main-bg-color: white;
     --alert-txt-color:red;
     --success-txt-color:green;
-    --high-bg-color:rgb(152, 165, 197);
+    --high-bg-color:#f6f8fa;
     --logo-txt-color:white;
-
-    --btn-bg-color:rgb(124, 161, 43);
+    
+    --btn-bg-color:#5c7d7e;
     --btn-txt-color:white;
     --btn-alt-bg-color:white;
-    --btn-alt-txt-color:rgb(124, 161, 43);
+    --btn-alt-txt-color:#5c7d7e;
     --test-btn-txt-color:white;
-    --test-btn-bg-color:var(--high-bg-color);
+    --test-btn-bg-color:var(--btn-bg-color);
     
-    --test-btn-alt-txt-color:var(--high-bg-color);
+    --test-btn-alt-txt-color:var(--btn-bg-color);
     --test-btn-alt-bg-color:white;
-
     
+    --burger-btn-txt-color:#7688a0;
+    --burger-btn-bg-color:#06376c;
+    --burger-btn-txt-alt-color:var(--high-bg-color);
 
+    --table-tr-odd-color:#fff;
+    --table-tr-even-color:#F7F7F7;
     --note-bg-color:white;
     --note-txt-color:#484848;
-    --accent-color:#4164CB;
+    --note-title-color:#484848;
+    --accent-color:rgb(101, 153, 117);/*#4164CB; 659975*/
     --ico-accent-color:rgba(65, 99, 203, 0.205);
     --search-bg-color:white;
     --test-selection-color:rgba(40, 65, 179, 0.062);

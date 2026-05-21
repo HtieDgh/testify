@@ -1,28 +1,27 @@
-# Курсовая работа по дисциплине "Базы данных"
+# Образовательный портал с модулем дистанционного тестирования "Testify"
 
-Материалы для выполнения курсовой работы:
-
-* Требования и порядок выполнения &mdash; в личном кабинете
-* Образец технического задания &mdash; в личном кабинете
-* Учебное пособие ("Разработка и развертывание веб-приложения на языке Python") &mdash; [на гитхабе](https://github.com/db-course/course-project-manual/blob/master/index.rst)
-
-Данный репозиторий необходимо форкнуть и использовать для выполнения работы. После внесения первых изменений, необходимо создать пулл-реквест, пометив его как "draft" (черновик). Предполагаемая структура форка:
+Данный репозиторий содержит исходный код проекта. Структура репозитория:
 
     /
     ├─ app/
-    │  ├─ ...
+    │  ├─ controller/
+    │  ├─ model/
+    │  ├─ view/
+    │  ├─ template/
+    │  ├─ static/
+    |  │  ├─ css/
+    |  │  ├─ js/
+    |  │  ├─ img/
+    |  │  ├─ site.webmanifest
     ├─ db/
-    │  ├─ generate.sql
+    │  ├─ testify_mysql_generate.sql
     │  ├─ ...    
     ├─ doc/
     │  ├─ erd.drawio
-    │  ├─ relational.drawio
     │  ├─ technical_specification.pdf
+    │  ├─ user_guide.pdf
     │  ├─ use-case.drawio
     ├─ .gitignore
-    ├─ myproject.py
     ├─ README.md
-    ├─ requirements.txt
-    ├─ start.sh
-
-После того, как проект будет полностью завершен, пометку "draft" можно снять.
+    ├─ CHANGELOG.php
+    ├─ index.php

@@ -1,0 +1,28 @@
+<div class="flex_c_r_ac welcome">
+    <div id="signin_form" class="ComeIn">
+        <form action="{{ @BASE }}" method="POST" class="LogIn">	
+            <h2 class="LogInTxt" id="serverInfo">Заполните поля ниже:</h2>
+            <div class="group">      
+            <input id="s_n" class="UserIn" name="name" type="text" required>
+            <span class="bar"></span>
+            <label for="s_n">Имя</label>
+        </div>
+        <div class="group">      
+            <input id="s_l" class="UserIn" placeholder="введите email" name="login" type="email" required>
+            <span class="bar"></span>
+            <label for="s_l">email</label>
+        </div>
+        <div class="group">      
+            <input id="s_p" class="UserIn" name="password" type="password" required>
+            <span class="bar"></span>
+            <label for="s_p">Пароль</label>
+        </div>
+        <div class="Entering">
+            <input class="EnterBtn" type="submit" value="Зарегистрироваться">
+            <br><br>
+            <p class="alert_txt"></p>
+            </div>
+            Уже зарегистрированы? <a href="{{ @BASE }}/login/">Войти</a><br><br>
+        </form>
+    </div>
+</div>

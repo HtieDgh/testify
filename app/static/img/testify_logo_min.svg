@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="60.510002mm"
+   height="40.393452mm"
+   viewBox="0 0 60.510002 40.393452"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="logo_design.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showguides="true"
+     inkscape:zoom="1.0218084"
+     inkscape:cx="802.98814"
+     inkscape:cy="357.69917"
+     inkscape:window-width="2560"
+     inkscape:window-height="1361"
+     inkscape:window-x="2391"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <sodipodi:guide
+       position="-16.402031,401.40355"
+       orientation="1,0"
+       id="guide7"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="20.449816,364.25862"
+       orientation="0,-1"
+       id="guide8"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="59.531053,401.56539"
+       orientation="0,-1"
+       id="guide3"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Слой 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-39.512101,-148.4551)">
+    <rect
+       style="fill:#5c7d7e;fill-opacity:1;stroke:#dea900;stroke-width:0;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:0;paint-order:normal"
+       id="rect1"
+       width="14.433667"
+       height="14.433667"
+       x="140.06845"
+       y="69.817497"
+       rx="0.25137138"
+       ry="0.071336187"
+       transform="rotate(45)"
+       inkscape:export-filename="testify_logo_min.svg"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96" />
+    <path
+       id="path1"
+       style="fill:#659975;fill-opacity:1;stroke:none;stroke-width:0;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:0"
+       d="m 90.170796,148.47831 c -0.0272,-0.0285 -0.284507,0.1861 -0.576963,0.47857 l -19.836201,19.83641 -6.464353,-6.46461 c -0.161088,-0.16092 -0.313261,-0.26827 -0.340939,-0.2408 l -10.005499,10.00545 c -0.02763,0.0293 0.07985,0.18 0.240851,0.34094 l 16.113319,16.11331 c 0.161052,0.16126 0.313069,0.26857 0.340724,0.24069 l 0.440393,-0.44044 c 0.06884,-0.0641 0.127515,-0.11228 0.204676,-0.18942 l 29.254243,-29.25428 c 0.292367,-0.29242 0.506063,-0.54964 0.478703,-0.57682 z" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#5c7d7e;stroke-width:1.09169;stroke-linecap:square;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4"
+       width="9.3384228"
+       height="9.3384228"
+       x="158.9606"
+       y="88.702629"
+       rx="0.16263461"
+       ry="0.046153814"
+       transform="rotate(45)" />
+  </g>
+</svg>

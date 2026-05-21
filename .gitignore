@@ -175,5 +175,12 @@ db/make_generate_sql.bat
 design/
 .vscode/
 
+# exclude user avatars
+app/static/img/user_avas/*
+!app/static/img/user_avas/default_ava.png
+
+app/static/img/course_avas/*
+!app/static/img/course_avas/default_ava.png
+
 # dynamic user_data folder for user saved files
 user_data/

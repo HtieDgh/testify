@@ -12,7 +12,10 @@
 .flex_se_r_ac,.flex_fs_r_ac,.flex_fs_c_ac,.flex_fe_c_ac{
     align-items:center;
 }
-.flex_c_r,.flex_c_c,.flex_c_c_ac,.flex_c_r_ac,.flex_c_r_ab,
+.flex_c_r_as,.flex_c_c_as{
+    align-items: stretch;
+}
+.flex_c_r,.flex_c_c,.flex_c_c_ac,.flex_c_r_ac,.flex_c_r_ab,.flex_c_r_as,.flex_c_c_as,
 .flex_sb_r,.flex_sb_c,.flex_sb_r_ac,.flex_sb_c_ac,
 .flex_fs_r,.flex_fs_r_ac,.flex_fs_c_ac,.flex_fs_r_afe,
 .flex_fe_r,.flex_fe_c_ac,.flex_fe_r_ac,
@@ -21,7 +24,7 @@
 {
     display:flex;
 }
-.flex_c_r,.flex_c_r_ac,.flex_c_r_ab,
+.flex_c_r,.flex_c_r_ac,.flex_c_r_ab,.flex_c_r_as,
 .flex_sb_r,.flex_sb_r_ac,
 .flex_fe_r,.flex_fe_r_ac,
 .flex_fs_r,.flex_fs_r_ac,.flex_fs_r_afe,
@@ -29,7 +32,7 @@
 .flex_se_r_afs,.flex_se_r_afe{
     flex-direction:row;
 }
-.flex_c_c,.flex_c_c_ac,
+.flex_c_c,.flex_c_c_ac,.flex_c_c_as,
 .flex_sb_c,.flex_sb_c_ac,
 .flex_fs_c_ac,.flex_fe_c_ac{
     flex-direction:column;
@@ -41,7 +44,7 @@
 .flex_fs_r,.flex_fs_r_ac,.flex_fs_c_ac,.flex_fs_r_afe{
     justify-content:flex-start;
 }
-.flex_c_r,.flex_c_c,.flex_c_c_ac,.flex_c_r_ac,.flex_c_r_ab{
+.flex_c_r,.flex_c_c,.flex_c_c_ac,.flex_c_r_ac,.flex_c_r_ab,.flex_c_r_as,.flex_c_c_as{
     justify-content:center;
 }
 .flex_sb_r,.flex_sb_c,.flex_sb_r_ac,.flex_sb_c_ac{
@@ -62,4 +65,13 @@
 
 .flex_ass{
     align-self:stretch;
+}
+.flex_gr1{
+    flex-grow:1;
+}
+.flex_gr2{
+    flex-grow:2;
+}
+.flex_gr3{
+    flex-grow:3;
 }

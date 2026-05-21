@@ -1,0 +1,64 @@
+/*Кнопки декорированые*/
+.page_block{
+    box-sizing: border-box;
+    background-color: white;
+    text-align: center;
+}
+@media(max-width:590px){
+    .page_block .prof_op_btn{
+        box-sizing: border-box;
+        display: block;
+        width: 80%;
+        margin: 0 auto;
+    }
+}
+    .page_block>p{
+        margin: 5px auto;
+    }
+.page_block_wrap{	
+    background:white ;
+    margin:0 auto;
+    padding:10px 10px;
+    border-radius:5px;
+    border: 3px solid var(--high-bg-color);
+    box-sizing: border-box;
+}
+.page_nums,.page_nums_rev,.page_nums_red_rev{
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0 0.2em;
+    border-radius:10px;
+    padding: 0.5em;
+    border: 2px solid  var(--accent-color);
+    font-weight: bold;
+}
+    .page_nums{
+        background-color:  var(--accent-color);
+        color: white;
+    }
+    .page_nums_rev{
+        border: 2px solid  var(--accent-color);
+    }
+    .page_nums_red_rev:hover,.page_nums:hover,.page_nums_rev,.EnterBtn:hover{
+        color:   var(--accent-color);
+        background-color:white;
+        transition: all 200ms ;
+
+    }
+
+    .page_nums_rev:hover{
+        color:white;
+        background-color: var(--accent-color);
+    }
+    .page_nums_red_rev{
+        text-align: center;
+        background-color: white;
+        color: #dd2929;
+        border:2px solid #dd2929;
+        font-weight: bold;
+    }
+        .page_nums_red_rev:hover {
+            color: white;
+            background-color: #dd2929;
+        }

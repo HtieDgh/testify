@@ -1,0 +1,383 @@
+function test_question_edit(){
+    var domain='/course-project-2024-4243';   
+    var confirm_state=0;
+////////////////////////////////////////////////////////////////////////////
+//редактор вопросов
+var all_qst_count=Number($('.all_qsts').html());
+//Создает запрос на скачивание zip архива теста
+function downloadFile(link) {
+    let a = document.createElement("a");
+    a.href = link;
+    a.target="_blank";
+    a.click();
+    }
+// Возвращает текущую структуру данных теста
+function getQuestionData() {
+    let qst_data=[];
+    //Формирование списка существующих вопросов и ответов на них
+    $('.questionjs').each((k,elem)=>{
+        
+        //Список имен файлов и их типов жля последуюбщей обработки на сервере
+        let files_input=$(elem).find('.fileinjs');
+        
+        let fls_list=[];
+        for (let i = 0; i < files_input[0].files.length; i++) {
+
+            fls_list.push({
+                name: files_input[0].files[i].name,
+                mime: files_input[0].files[i].type
+            });
+        }
+        //Список ответов
+        let answ_list=[]
+        $(elem).find('.qstanswjs').each(function(k,v) {
+            if($(v).find('textarea').val()!=''){
+                answ_list.push({
+                    id:$(v).find('.answidjs').val(),
+                    text: $(v).find('textarea').val(),
+                    price: $(v).find('input[name=price]').val(),
+                    fine: $(v).find('input[name=fine]').val()
+                });
+            }else{
+                throw new Error('Заполните все поля ответов, прежде чем завершать редактирование');
+            }
+        });
+        if($(elem).find('.qst_title').val().trim()!=''){
+            qst_data.push({
+                id:$(elem).find('.qidjs').val(),
+                title: $(elem).find('.qst_title').val(),
+                text: $(elem).find('.qst_txt').val(),
+                is_open: $(elem).find('input[name=type]:checked').val(),
+                is_vid_hidden: $(elem).find('input[name=is_vid_hidden]').prop('checked'),
+                file_names: fls_list,
+                answs: answ_list
+            });
+        }else{
+            throw new Error('Заполните Заголовки вопросов, прежде чем завершать редактирование');
+        }
+        
+    });
+            
+    return qst_data;
+}
+    
+/*===========Добавление событий на кнопки после их рендера на странице=================*/
+function neweditor(){
+    //===== Удаление вопроса из списка =====
+    $('.del_qst_btn').off('click').click(function(e){
+        e.preventDefault();
+        let q_id=$(this).attr('href');
+        //Плавное исчезновение
+        $('#'+q_id+'_q').animate({opacity:0},300,function(){
+            $(this).remove();
+            all_qst_count--;
+            $('.all_qsts').html(all_qst_count);
+            $('.cur_all_qsts').each((k,v)=>{
+                $(v).html(k+1);
+            })
+        });
+        
+    });
+
+    //==== Добавление варианта ответа в вопрос ====
+
+    $('.add_answ_btn').off('click').click(function(e){
+        e.preventDefault();
+        let q_id=$(this).attr('href');
+        let answ_count=Number($('#'+q_id+'_answ_count').val());
+        
+        answ_count++;
+        
+        $(this).before(
+            `<div class="qstanswjs flex_fs_r_ac transparent">
+                <input type="hidden" name="answidjs" class="answidjs" value="0">
+                
+                <span class="fs14_txt answ_number mr_r_10">`+answ_count+`</span>
+                <textarea rows="1" class=" mr_r_10" name="`+q_id+`_`+(answ_count-1)+`_qst_answ" placeholder="Текст ответа" value="" required></textarea>
+                <input type="number"  name="price" min="-1000" max="1000" value="0">
+                <input type="number" class="fine_input" name="fine" min="-1000" max="1000" value="0">
+
+                <a title="Удалить вариант ответа" class="qst_btn_alt del_answ_btn" href="`+q_id+`"><img alt="Удалить вариант ответа" src="${domain}/minus_test.svg"></a>
+            
+            </div>`
+        );
+        $('#'+q_id+'_answ_count').val(answ_count);
+        //Плавное появление ответа 
+        $('.qstanswjs').animate({opacity:1},300);
+        //Добавление кнопки Удалить вар ответа если до этого она была скрыта
+        $('#'+q_id+'_q .del_answ_btn').show();
+        neweditor();
+    });
+
+
+
+    //=== Удаление ответа ===
+    $('.del_answ_btn').off('click').click(function(e){
+        e.preventDefault();
+        
+        let q_id=$(this).attr('href');
+        let p=$(this).parent().parent();
+        //Плавное исчезновение
+        $(this).parent().animate({opacity:0},300,function(){
+            $(this).remove();
+                //Обновление номеров у span
+            p.find('.answ_number').each((k,v)=>{
+                $(v).html(k+1);
+            });
+            //Обновление кол-ва ответов для отображения номера
+            $('#'+q_id+'_answ_count').val($('#'+q_id+'_answ_count').val()-1);
+            //Удалить последний вар ответа нельзя
+            if($('#'+q_id+'_answ_count').val()==1){
+                $('#'+q_id+'_q .del_answ_btn').hide();
+            }
+        });
+    });
+
+    //Смена типа с Закрытого на Открытый меняет варианты ответов
+    $('.form-inner input[name=type]').off("change").change(function(){
+        let q_id = $(this).attr('id').substring(0,$(this).attr('id').indexOf('_'));
+        
+        $('#'+q_id+'_q .qstanswjs').remove();
+        $('#'+q_id+'_answ_count').val('1');
+        if (this.value == '1') {
+            $('#'+q_id+'_answ_list').after(`
+            <div class="qstanswjs flex_fs_r_ac transparent">
+                <input type="hidden" name="answidjs" class="answidjs" value="0">    
+
+                <textarea rows="1" class=" mr_r_10" name="`+q_id+`_0_qst_answ" placeholder="Текст ответа" value="" required></textarea>
+                
+                <input type="number" name="price" min="-1000" max="1000" value="0">
+                <input type="number" name="fine" min="-1000" max="1000" value="0">
+
+            </div>`);
+            $('#'+q_id+'_q').find('input[name=fine]').show();
+            $('.add_answ_btn[href='+q_id+']').remove();
+
+        }else{
+            $('#'+q_id+'_answ_list').after(`
+            <div class="qstanswjs flex_fs_r_ac transparent">
+                <input type="hidden" name="answidjs" class="answidjs" value="0">
+
+                <span class="fs14_txt answ_number mr_r_10">1</span>
+                <textarea rows="1" class=" mr_r_10" name="`+q_id+`_0_qst_answ" placeholder="Текст ответа" value="" required></textarea>
+                
+                <input type="number" name="price" min="-1000" max="1000" value="0">
+                <input type="number" name="fine" min="-1000" max="1000" value="0">
+                <a title="Удалить вариант ответа" class="qst_btn_alt del_answ_btn" href="0"><img alt="Удалить вариант ответа" src="${domain}/minus_test.svg"></a>
+            
+            </div>
+            <a title="Добавить вариант ответа" class="qst_btn add_answ_btn" href="`+q_id+`"><img alt="Добавить вариант ответа" src="${domain}/add_test.svg"></a>`);
+            
+            neweditor();
+        }
+        $('.transparent').animate({opacity:1},300);
+    });
+}
+//==== Добавление вопроса в список ==== 
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1) + min); // Максимум и минимум включаются
+}
+// Одиночный клик - Новый вопрос
+$('#add_qst_btn').click(function(e){
+    e.preventDefault();
+    let rnd=0;
+    while ($('#'+rnd+'_q').length!=0) {
+        rnd=getRandomInt(1,65536);
+    }
+    
+    $(this).before(
+        `<div id="`+rnd+`_q" class="questionjs note transparent">
+        <div class="flex_sb_r">
+            <form class="decor" method="post" action="new_test/">
+                <div class="form-inner">
+                    <input type="hidden" name="qidjs" class="qidjs" value="0">
+                    <input type="text" class="fs12_txt qst_title" name="qst_title" placeholder="Заголовок" value="" required>
+                    <div class="flex_sb_r flex_wr">
+                        <div class="qst_type flex_sb_r_ac">
+                            <div class="flex_fs_r_ac">
+                                <input  class="mr_r_10" type="radio" id="`+rnd+`_type" name="type" value="0" checked />
+                                <label for="`+rnd+`_type">Закрытый</label>
+                            </div>
+
+                            <div class="flex_fs_r_ac">
+                                <input class="mr_r_10" type="radio" id="`+rnd+`_2_type" name="type" value="1" />
+                                <label for="`+rnd+`_2_type">Открытый</label>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <textarea name="note_txt" class="edit_txt qst_txt" placeholder="Текст вопроса" rows="4" required></textarea>
+                    <div class="flex_sb_r_ac flex_wr">
+                        <input class="fileinjs UserIn" id="`+rnd+`_files" accept="image/*,video/*,audio/*" name="user_files[]" type="file" multiple>
+                        <div class="flex_fs_r_ac">
+                            <input class="mr_r_10" type="checkbox" name="is_vid_hidden" id="`+rnd+`_is_vid_hidden">
+                            <label for="`+rnd+`_is_vid_hidden">Скрыть видео?</label>
+                        </div>
+                    </div>
+                        
+                    <div class="mt_10">
+                        <p class="ac_txt">Варианты ответов:</p>
+                        <input id="`+rnd+`_answ_count" type="hidden" name="answ_count" value="1">
+                        <hr id="`+rnd+`_answ_list">
+                        <div class="qstanswjs flex_fs_r_ac">
+                        <input type="hidden" name="answidjs" class="answidjs" value="0">
+                        
+                            <span class="fs14_txt answ_number mr_r_10">1</span>
+                            <textarea rows="1" class=" mr_r_10" name="`+rnd+`_0_qst_answ" placeholder="Текст ответа" value="" required></textarea>
+                            
+                            <input type="number" name="price" min="-1000" max="1000" value="0">
+                            <input type="number" class="fine_input" name="fine" min="-1000" max="1000" value="0">
+                            <a title="Удалить вариант ответа" class="qst_btn_alt del_answ_btn" href="`+rnd+`"><img alt="Удалить вариант ответа" src="${domain}/minus_test.svg"></a>
+                        
+                        </div>
+                        <a title="Добавить вариант ответа" class="qst_btn add_answ_btn" href="`+rnd+`"><img alt="Добавить вариант ответа" src="${domain}/add_test.svg"></a>
+                    </div>
+                    
+                </div>
+            </form>
+            <div class="flex_fs_c_ac">
+                <div class="qst_number ac_txt fs12_txt">
+                    <span class="cur_all_qsts">`+(all_qst_count+1)+`</span>/<span class="all_qsts"></span>
+                </div>
+                
+                <a title="Удалить вопрос из теста" class="qst_btn_alt del_qst_btn" href="`+rnd+`">
+                    <div class="flex_c_c">
+                        <img alt="Удалить вопрос из теста" src="${domain}/minus_test.svg">
+                    </div>
+                </a>
+                
+            </div>
+            
+        </div>
+        </div>`);
+    //Плавное появление
+    $('#'+rnd+'_q').animate({opacity:1},300);
+    //Прибавка +1 к номеру для отображения
+    all_qst_count++;
+    $('.all_qsts').html(all_qst_count);
+    
+    neweditor();
+});
+// Двойтой клик - Открыть список существующих вопросов в БД 
+// TODO
+
+
+//==== Завершение Редактирования. Отправка Теста на сервер и получение файла сохранения на клиенте ====
+
+$('#confirm_edit_btn').click(function(e){
+    e.preventDefault();
+    //Подсчет кол-ва загружаемых на сервер файлов
+    var up_file_count=0;
+    if(confirm_state==0){
+        confirm_state=1;
+        $('.fileinjs').each(function(){
+                    
+            for (let i = 0; i < $(this).prop('files').length; i++) {
+                up_file_count++;
+            }
+        });
+        
+        //Запуск анимации загрузки: изменяется текст
+        $(this).html(`Отправка...`);
+  
+
+        function fn_onCompleteTestLoad(data){
+            $('#confirm_edit_btn').html('Ошибка');
+            console.log(data);
+            let msg=JSON.parse(data);
+            if(!msg.err){
+                $('#ex1').modal();
+                $('#a_test_link').attr('href',msg.link).html(msg.link);
+                downloadFile(msg.test_file_link);
+                $('#confirm_edit_btn').html('Завершить редактирование');
+                $('#confirm_edit_btn').attr('href',`${domain}/profile/tests/my`);
+                $('#confirm_edit_btn').off('click')
+            }else{
+                $('#err_wrap').modal();
+                $('#exept_txt').html(msg.err_txt);
+                $('#confirm_edit_btn').html('Попробуйте снова');
+            }
+            confirm_state=0;
+        }
+        function fn_onCompleteFilesLoad() {
+            let fd2=new FormData();
+            //Включение question_data в форму отправки
+            fd2.append('question_data',JSON.stringify(getQuestionData()));
+            //Отправка запроса
+            $.ajax({
+                url: domain+'/edit/questions/'+$('#variant_link').val(),
+                data: fd2,
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST', // For jQuery < 1.9
+                success: fn_onCompleteTestLoad,
+                error: ()=>{
+                    confirm_state=0;
+                    $('#confirm_edit_btn').html('Попробуйте снова');
+                }
+            }); 
+        }
+        try {
+            if(up_file_count>0) {
+                let fd=new FormData();
+        
+                //Поготовка данных перед отправкой файлов теста 
+                fd.set('file_count',up_file_count);
+                
+                $('.fileinjs').each(function(){
+                    for(const file of this.files){
+                        //Размер файла боьше 500 Мб - ошибка
+                        if(file.size > 500*1048576){
+                            throw new Error(file.name+' - файл превышает размер 500 мб');
+                        }
+                        fd.set('file',file);
+                        
+                        $.ajax({
+                            url: domain+'/send/test/file/'+$('#variant_link').val(),
+                            data: fd,
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            method: 'POST',
+                            success: function(data){
+                                console.log(data);
+                                let msg=JSON.parse(data);
+                                if(msg.err){
+                                    $('#err_wrap').modal();
+                                    $('#exept_txt').html(msg.err_txt);
+                                    $('#confirm_edit_btn').html('Повторить отправку');
+                                    confirm_state=0;
+                                }
+                            },
+                            error: ()=>{
+                                confirm_state=0;
+                                $('#confirm_edit_btn').html('Попробуйте снова');
+                            }
+                        });
+                    }
+                });
+                delete fd;
+                fn_onCompleteFilesLoad();
+                //=== Отправка файлов окончена ===
+            }else{
+                //файлов нет
+                fn_onCompleteFilesLoad();
+            }
+        } catch (ex) {
+            
+            $('#err_wrap').modal();
+            $('#exept_txt').html(ex.message);
+            $('#confirm_edit_btn').html(`Следующий шаг`);
+        }
+    }
+});
+    
+//Регистрация событий кнопок управления
+neweditor();
+}
+Functions.push(test_question_edit);

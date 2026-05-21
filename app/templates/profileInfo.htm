@@ -1,0 +1,23 @@
+<div class="wrap_block prof_u_stat">
+    <div class="flex_c_r">
+        <div class="ava_img">
+            <img id="imgprof_{{@user.id}}" src="{{@user.ava_url}}">
+        </div>
+        
+    </div>
+    
+    <div class="profile_info">
+        <h2 class="note_title" >{{ @user.name }}</h2>
+        <p>
+        Зарегистрирован: {{ @user.created }}
+        </p>
+    </div>
+    <div class="flex_c_r"><a href="{{@BASE}}/editor/profile" class="page_nums">Изменить профиль</a></div>
+</div>
+<div class="note">
+    <h2 class="note_title">Обо мне</h2>
+    <hr>          
+    <p>
+        {{ @user.status }}
+    <p>
+</div>
