@@ -6,7 +6,7 @@ function getCookie(name) {
     return matches ? decodeURIComponent(matches[1]) : undefined;
   }
 function subs(){
-    var domain='/course-project-2024-4243';
+    var domain='/testify';
 //Кнопка Подписаться
 $('.a_sub_btn').click(function(e){
     e.preventDefault();

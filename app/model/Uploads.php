@@ -170,7 +170,7 @@ class Uploads{
 	}
 
 	/**
-	 * <p>Удаляет файлы варианта из файловой системы по его variant_link или test_id</p>
+	 * Удаляет файлы варианта из файловой системы по его variant_link
 	 * @param string link
 	*/
 	public function deleteVariant($variant_link)

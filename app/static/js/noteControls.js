@@ -7,7 +7,7 @@ function getCookie(name) {
 
 function noteControl(){
 /*для правельной работы скрипта указать корнивую папку с файлами */
-var domain='/course-project-2024-4243';
+var domain='/testify';
 function displayComments(data,id_note,cur_btn=false)
 {
     let authorId=getCookie('security_id');

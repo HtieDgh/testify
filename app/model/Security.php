@@ -232,7 +232,7 @@ class Security
 	public static function getUserLogin(\DB\SQL &$db,$userID) : string
 	{
 		$out=$db->exec("SELECT login FROM secured_account WHERE id=?",$userID);
-		return empty($out)?'':$out['login'];
+		return empty($out)?'':$out[0]['login'];
 	}
     public static function getUser_login(\DB\SQL &$db,$user_login){
         return $db->exec("SELECT * FROM secured_account WHERE login=?",[$user_login]);

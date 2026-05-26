@@ -20,7 +20,8 @@ final class ProfilePage extends PageAbstract
     public string $myTestsHtml='';
     public string $variantsLinkModalHtml='';
     public string $goToTestModalHtml='';
-    public string $profile_user_info='';
+    public string $userInfo='';
+    public string $modalTestBackupLoad='';
     public string $page_html='';// переключение между статистика/ ваши записи/ подписки/ тесты.
 
     public string $b_a_html='';
@@ -88,7 +89,7 @@ final class ProfilePage extends PageAbstract
     {
         $this->_set_css(['general.css','profile.css','buttons.css']);
         
-        $this->profile_user_info='<section class="left_block">'.
+        $this->userInfo='<section class="left_block">'.
         Template::instance()->render('profileInfo.htm').
         '</section>';
         return $this;
@@ -469,7 +470,7 @@ final class ProfilePage extends PageAbstract
                         <a title="Создать новый" href="'.$f3->get("BASE").'/editor/test/0"><img alt="Создать новый тест" src="'.$f3->get("BASE").'/add_test.svg"></a>
                     </div>
                     <div class="test_btn">
-                        <a title="Загрузить существующий" тест href=""><img alt="Загрузить существующий тест" src="'.$f3->get("BASE").'/upl_test.svg"></a>
+                        <a title="Загрузить существующий" тест href="#" id="upload_backup_btn_js"><img alt="Загрузить существующий тест" src="'.$f3->get("BASE").'/upl_test.svg"></a>
                     </div>
                 </div>
             </div>
@@ -490,6 +491,25 @@ final class ProfilePage extends PageAbstract
                 <br>
                 <textarea rows="3" class="w_100" name="varlinks" placeholder="Название Варианта" value=""></textarea>
             </div>';
+        return $this;
+    }
+    //тесты созданные пользователем
+    public function addBackupLoad() : static
+    {
+        $this->_set_css(['general.css','jquery.modal.min.css']);
+        $this->_set_js(['test_profile.js','jquery.modal.min.js']);
+        $this->modalTestBackupLoad='<div id="load_test_backup_js" class="modal">
+            <form method="POST" action="'.\Base::instance()->get('BASE').'/test/restore" enctype="multipart/form-data">
+                <p>
+                    Выберете zip архив загружаемого теста
+                </p>
+                <div  class="flex_sb_r_ac mr_t_10">
+                    <input type="file" name="backup" id="backup">
+                    <button type="submit" class="page_nums"> Отправить </button>
+                </div>
+            </form>
+        </div>';
+        
         return $this;
     }
     protected function _GetResultWrap(array $v)
@@ -522,7 +542,7 @@ final class ProfilePage extends PageAbstract
         <section class="content ">
         <div id="scrollTarget" class="ClearFix">
             <article class="flex_c_r artcl_block">
-                '.$this->profile_user_info.'
+                '.$this->userInfo.'
                
                 <section class="center_page">
                     '.( $this->page_html != '' ?
@@ -554,6 +574,7 @@ final class ProfilePage extends PageAbstract
         '.$this->variantsLinkModalHtml.'
         '.$this->scrollToTopBtn.'
         '.$this->errorModalWrap.'
+        '.$this->modalTestBackupLoad.'
         '.$this->footer.
         $this->js2link($f3->get("BASE"),$this->js).
         '</body>';

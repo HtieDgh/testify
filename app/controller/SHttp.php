@@ -748,7 +748,7 @@ class SHttp{
 		);
 	}	
 	/**
-	 * Профиль, раздел тестов
+	 * Профиль, раздел тестов, попытки
 	 */
 	public function profileTestsPage(\Base $f3,$params=NULL) 
 	{
@@ -876,6 +876,7 @@ class SHttp{
 			->addProfileInfo()
 			->addTitle('Ваши тесты - Профиль - Testify')
 			->addGoToTestModal($f3)
+			->addBackupLoad()
 			->addFooter();
 
 		echo ProfilePage::i()->htmlRender(

@@ -87,7 +87,7 @@ class XHttp
                     
                     S::updateCookie('variant_link',$params['variant_link'],"/",$_SERVER['HTTP_HOST']);
                     //Удаление файлов если они существуют
-                    $upl->DeleteVariant($variant_link);
+                    $upl->deleteVariant($variant_link);
                 }
             }else if( $t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id')) || $f3->get('user.isAdmin'))
             {
@@ -95,7 +95,7 @@ class XHttp
                 $variant_link=$params['variant_link'];
                 S::updateCookie('variant_link',$params['variant_link'],"/",$_SERVER['HTTP_HOST']);
                 //Удаление файлов если они существуют
-                $upl->DeleteVariant($variant_link);
+                $upl->deleteVariant($variant_link);
             }else{
                 throw new \Exception("Пользователь не авторизован", 403);
             }
@@ -213,10 +213,10 @@ class XHttp
             $variants=$t->GetAllTestVariants_tid($params['test_id']);
             foreach ($variants as $v) {
                 //Удаление файлов всех вариантов теста
-                $upl->DeleteVariant($v['unique_url']);   
+                $upl->deleteVariant($v['unique_url']);   
             }
             //Удаление из БД
-            $t->DeleteTest($params['test_id']);
+            $t->deleteTest($params['test_id']);
             $returnOut['err']=FALSE;
             
         } catch (\Exception $e) {
@@ -254,10 +254,10 @@ class XHttp
                 }
 
                 //Удаление файлов варианта теста
-                $upl->DeleteVariant($params['variant_link']);   
+                $upl->deleteVariant($params['variant_link']);   
                 
                 //Удаление из БД
-                $t->DeleteVariant($params['variant_link']);
+                $t->deleteVariant($params['variant_link']);
             }
             $returnOut['err']=FALSE;
         } catch (\Exception $e) {
@@ -289,7 +289,9 @@ class XHttp
                 throw new \Exception("Ошибка при передаче данных вопросов. Попробуйте снова.", 403);
             }
             $t=new Test($db);
-            if(!$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id')) && !$f3->get('user.isAdmin')){
+            if(
+                !$t->CheckTestAuthor_link($params['variant_link'],$f3->get('user.id')) && !$f3->get('user.isAdmin')
+            ){
                 throw new \Exception("Попытка изменить тест, которого не существует, или тест другого пользователя. Повторите операцию.", 403);                
             }
             $f3->set('POST',CFuns::sanitizeString($_POST));
@@ -310,13 +312,13 @@ class XHttp
 
             //получение данных теста
                 $test_struct=$t->GetUserTest($params['variant_link']);
-                if( count($test_struct)==0 ){
+                if( empty($test_struct) ){
                     throw new \Exception("Ошибка: Данные теста не найдены, повторите операцию", 403);   
                 }
             
             if( $upl->UploadJSONTestData(json_encode([
                 'test'=>$test_struct,
-                'variant'=>$t->GetVariant($params['variant_link']),
+                'variant'=>$t->GetVariant($params['variant_link'])[0],
                 'qsts'=>$q_data
             ]), $params['variant_link']) === FALSE )
             {
@@ -327,6 +329,7 @@ class XHttp
             $backup=$upl->GetBackupPath($params['variant_link']);
 
         //Генерация архива и ссылки на него
+            array_map('unlink', glob($backup['folder'].'*.zip'));//удалить все существующие zip в папке
             HZip::zipDir($backup['folder'],$backup['link']);
             $returnOut['test_file_link']=$f3->get('SITE_DOMAIN').'/'.$backup['link'];
         //генерация ссылки на готовый вариант теста

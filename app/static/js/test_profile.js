@@ -1,5 +1,5 @@
 function test_profile(){
-    var domain='/course-project-2024-4243';
+    var domain='/testify';
     //Удаление теста
     $('.test_del_btn').click(function(e){
         e.preventDefault();
@@ -49,6 +49,11 @@ function test_profile(){
             });
             $('#ex_variants').modal();
         });
+    })
+    //загрузка резервной копии теста
+    $('#upload_backup_btn_js').click(function(e){
+        e.preventDefault();
+        $('#load_test_backup_js').modal();
     })
 }
 Functions.push(test_profile);

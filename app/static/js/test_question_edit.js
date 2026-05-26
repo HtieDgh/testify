@@ -1,5 +1,5 @@
 function test_question_edit(){
-    var domain='/course-project-2024-4243';   
+    var domain='/testify';   
     var confirm_state=0;
 ////////////////////////////////////////////////////////////////////////////
 //редактор вопросов

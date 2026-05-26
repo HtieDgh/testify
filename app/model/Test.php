@@ -1,6 +1,6 @@
 <?php namespace model;
 class Test{
-    public static $db;
+    public static \DB\SQL $db;
     public function __construct(&$db) {
         static::$db=$db;
     }
@@ -87,7 +87,7 @@ class Test{
         return $out;
     }
     /**
-     * <p> Принимает test_data и обновляет тест в бд</p>
+     * Принимает test_data и обновляет тест в бд
      * @param array td - данные о тесте 
      * @return bool результат $db->exec()
      */ 
@@ -119,7 +119,7 @@ class Test{
         LEFT JOIN question_open q_o ON q_o.id=q.id
         WHERE v.unique_url=?";
         $quest_data['questions']=static::$db->exec($q,[$variant_link]);
-        $quest_data['variant']=$this->GetVariant($variant_link);
+        $quest_data['variant']=$this->GetVariant($variant_link)[0];
         
         foreach ($quest_data['questions'] as $v) 
         {
@@ -177,8 +177,7 @@ class Test{
     public function GetVariant($variant_link){
         return static::$db->exec("SELECT v.*
         FROM variant v
-        WHERE v.unique_url='$variant_link'
-        ")[0];
+        WHERE v.unique_url=?",$variant_link);
     }
     public function GetAllTestVariants_tid($test_id) {
         return static::$db->exec("SELECT v.* 
@@ -188,10 +187,10 @@ class Test{
         );
     }
     /**
-     * <p>Создает вопросы для варианта</p>
+     * Создает вопросы для варианта
     */
     public function saveQuestions($q_data,$variant_link,$fileDir='') {
-        $vid=$this->GetVariant($variant_link)['id'];
+        $vid=$this->GetVariant($variant_link)[0]['id'];
         $q="SELECT MAX(id) as max_id FROM question";
         $cur_qst_id=intval(static::$db->exec($q)[0]['max_id'])+1;
 
@@ -428,7 +427,7 @@ class Test{
      * <p>Удаление теста из БД по его id. Удаляет также и вопросы/ответы всех вариантов этого теста</p>
      * @param int test_id
     */
-    public function DeleteTest($test_id)
+    public function deleteTest($test_id)
     {
         static::$db->exec(
             [
@@ -451,7 +450,7 @@ class Test{
      * <p>Удаление варианта теста из БД по его unique_url. Не удаляет вопросы</p>
      * @param int test_link
     */
-    public function DeleteVariant($variant_link)
+    public function deleteVariant($variant_link)
     {
         static::$db->exec("DELETE FROM variant
             WHERE unique_url=?",
@@ -459,7 +458,27 @@ class Test{
             $variant_link
         ]);
     }
-
+    
+    /**
+     * Удаление варианта и всех его вопросов
+     *
+     * @param  mixed $variant_link
+     * @return int
+     * @see THttp->uploadBackup()
+     */
+    public function deleteVariantWithQuestions($variant_link){
+        
+        static::$db->exec(
+            "DELETE FROM question WHERE id IN(
+                SELECT question_id FROM variant_question v_q 
+                INNER JOIN variant v ON v.id=v_q.variant_id
+                WHERE v.unique_url=?
+            )",
+            $variant_link
+        );
+        $this->deleteVariant($variant_link);
+        return static::$db->count();
+    }
     /**
      * <p>Формирует результат сдачи теста</p>
      *
@@ -622,7 +641,7 @@ class Test{
     }
 
     /**
-     * <p>Возвразвращает попытки пользователей, для вывода на странице со статистикой Теста, по его id</p>
+     * Возвразвращает попытки пользователей, для вывода на странице со статистикой Теста, по его id
      *
      * @param string $test_id
      * @param array $where[] - массив резульатов работы GetWhere
@@ -685,7 +704,7 @@ class Test{
     }
    
     /**
-     * <p>Возвращает секцию WHERE и ws массив для SQL запросов, для поиска</p>
+     * Возвращает секцию WHERE и ws массив для SQL запросов, для поиска
      *
      * @param string $search - строка со словами разделеные пробелами по которым будет вестись поиск
      * @param array $fields - массив из строк-полей по которым необходима фильтрация выдачи

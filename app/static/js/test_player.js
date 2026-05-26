@@ -1,5 +1,5 @@
 function test_player(){
-    var domain='/course-project-2024-4243';
+    var domain='/testify';
     //TODO localStrorage
     var test_state=0;//0 - начать тест, 1 - продолжить/открыть след. вопрос, 2 - завершить
     var q_iter=0;

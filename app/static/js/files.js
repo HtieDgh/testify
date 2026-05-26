@@ -1,5 +1,5 @@
 function files(){
-var domain='/course-project-2024-4243';
+var domain='/testify';
 var ext='';//допустимые расщирения принятые от сервера
 var chosen={jobj:{img:[],file:[],video:[]},img:[],file:[],video:[]};
 $.get(domain+'/editor/files/ext',

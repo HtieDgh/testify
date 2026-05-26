@@ -1,5 +1,5 @@
 function test_edit(){
-    var domain='/course-project-2024-4243'; 
+    var domain='/testify'; 
     var t_id=$('.add_elem_btn').attr('href');
 
     function getTestData() {

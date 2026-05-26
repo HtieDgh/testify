@@ -3,6 +3,7 @@ use model\Security as S;
 use model\Test;
 use model\Uploads;
 use model\CFuns;
+use model\HZip;
 use view\Courses;
 use view\TestEditorPage;
 use view\TestPage;
@@ -13,7 +14,7 @@ class THttp{
     
     public function __construct()
     {
-        global $f3;
+        $f3=\Base::instance();
         $this->db=new \DB\SQL
         (
             $f3->get('DB_TESTIFY.db_type').':host='.$f3->get('DB_TESTIFY.db_host').';port='.$f3->get('DB_TESTIFY.db_port').';dbname='.$f3->get('DB_TESTIFY.db_name'),
@@ -299,5 +300,110 @@ class THttp{
             head:TestPage::i()->head()
         );
 	}
+    /**
+	 * Просмотр статистики теста конкретного автора
+	*/
+    public function uploadBackup($f3,$params){
+        $loginError=S::loginTest($this->db);
+        if($loginError!=''){ $f3->reroute('/login/'.urlencode($loginError)); }
+		if(!$f3->get('user.isAuthor') && !$f3->get('user.isAdmin')){
+			$f3->error(404);
+		}
+        // Загрузка теста
+        if(!isset($_FILES['backup'])){
+            $f3->reroute('/profile/'.urlencode('Ошибка: тест не был загружен, повторите снова'));
+        }
+        //подготовка путей к извелечнию, замена слешей на windows стиль
+        $destination = str_replace(array("/", "\\"), DIRECTORY_SEPARATOR, $f3['ROOT'].$f3['BASE'].$f3['user_backup_test_folder']);
+
+        //извлечение файлов
+        $extractedFiles=HZip::extractZipFiles(
+            $_FILES['backup']['tmp_name'],
+            $destination
+        );
+        
+        //проверка наличия test.json
+        $json_path=array_filter(
+            $extractedFiles,
+            function($path) {
+                return str_contains($path,'test.json');
+            }    
+        );
+        if(empty($json_path)){
+            $f3->reroute('/profile/'.urlencode('Ошибка: тест не был загружен, отсутствует test.json, потворите снова или обратитесь к администратору'));
+        }
+
+        //чтение извлеченого test.json
+        $json_str_test=file_get_contents($json_path[0]);
+        if($json_str_test===false){
+            $f3->reroute('/profile/'.urlencode('Ошибка: тест не был загружен, test.json не обработан, обратитесь к администатор'));
+        }
+        //получение контента
+        $test_data=json_decode($json_str_test,TRUE);
+        if(
+            $test_data===null || 
+            !isset($test_data['test'][0]['author_id']) ||
+            !isset($test_data['variant']['unique_url'])
+            ){
+            $f3->reroute('/profile/'.urlencode('Ошибка: тест не был загружен, неверный формат test.json, обратитесь к администатору'));
+        }
+        //TODO $test_data['test'][0]['author_id'] избавится от вложености теста [0] (перебрать все существующие и создать заново в THttp->EditQuestions uploadJSONTestData)
+        // Проверить является ли отправитель - автором теста или админом
+        if(
+            $test_data['test'][0]['author_id']!=$f3->get('user.id') && 
+            !$f3->get('user.isAdmin')
+        ){
+            $f3->reroute('/profile/'.urlencode('Ошибка: тест не был загружен, недостаточно прав, обратитесь к администатору'));
+        }
+        $upl=new Uploads(
+            users_dir:$f3['user_data_path'],
+            login:S::getUserLogin($this->db, $test_data['test'][0]['author_id'])
+        );
+        $t=new Test($this->db);
+        // Подготовить к вставке test_data 
+        $test_data['test'][0]['test_start']=$test_data['test'][0]['datetime_start'];
+        $test_data['test'][0]['test_end']=$test_data['test'][0]['datetime_end'];
+        $test_data['test'][0]['test_id']=$test_data['test'][0]['id'];
+        $test_data['variant']['is_active']=true;
+        // в различный условиях различные дейтсвия 
+
+        // Проверить существует ли тест в БД
+        $testExists=$t->CheckTestAuthor_tid($test_data['test'][0]['test_id'],$test_data['test'][0]['author_id']);
+        //есть ли вариант этого теста
+        $varExists=!empty($t->GetVariant($test_data['variant']['unique_url']));
+
+        if($testExists && $varExists){
+            //если существует тест и вариант то обновить тест и удалить вариант
+            // Удалить текущий вариант и файлы
+            $upl->deleteVariant($test_data['variant']['unique_url']);
+            $t->deleteVariantWithQuestions($test_data['variant']['unique_url']);
+            
+            // Обновить данные теста
+            $t->UpdateTest($test_data['test'][0]);
+            $newTestId=$test_data['test'][0]['id'];
+        }elseif ($testExists) {
+            // Если существует только тест, то обновить тест
+            // Обновить данные теста
+            $t->UpdateTest($test_data['test'][0]);
+            $newTestId=$test_data['test'][0]['id'];
+        }else{
+            //нет ни теста ни варианта, то создать тест
+            // Создать тест
+            $newTestId=$t->CreateTest($test_data['test'][0],$test_data['test'][0]['author_id']);
+        }
+
+        // Создать варианты
+        $newVarLink=$t->CreateVariants($newTestId, [$test_data['variant']]);
+        // и вопросы
+        $t->saveQuestions($test_data['qsts'],$newVarLink);
+
+        //скопировать(переименовать) из backup в папку варианта теста
+        rename(
+            $f3['ROOT'].$f3['BASE'].$f3['user_backup_test_folder'].DIRECTORY_SEPARATOR.$test_data['variant']['unique_url'],
+            $f3['ROOT'].$f3['BASE'].DIRECTORY_SEPARATOR.$upl->test_dir.$newVarLink
+        );
+
+        $f3->reroute('/profile/'.urlencode('Тест был успешно загружен'));
+    }
 }
 ?>
